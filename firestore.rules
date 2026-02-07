@@ -136,5 +136,14 @@ service cloud.firestore {
       // Only faculty, HOD, and admin can manage class sections
       allow write: if isStaffOrAbove();
     }
+
+    // Admin Student Records (for registration and management)
+    match /admin/students/{branch}/{studentId} {
+      // Allow public read so registration page can check if student exists
+      allow read: if true;
+      
+      // Allow write if authenticated (registration or admin)
+      allow write: if isAuthenticated();
+    }
   }
 }

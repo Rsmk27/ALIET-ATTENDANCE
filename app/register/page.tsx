@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { GraduationCap, User, Mail, Lock, Phone, Building2 } from 'lucide-react';
+import { GraduationCap, User, Mail, Lock, Phone, Building2, CheckCircle } from 'lucide-react';
 import { detectBranchInfo } from '@/utils/branchDetector';
 import studentData from '@/data/students.json';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -14,6 +16,7 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [branchWarning, setBranchWarning] = useState('');
     const [entryType, setEntryType] = useState<string | undefined>('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -28,20 +31,24 @@ export default function RegisterPage() {
         year: 1,
     });
 
+    // Auto-redirect after 3 seconds when success modal is shown
+    useEffect(() => {
+        if (showSuccessModal) {
+            const timer = setTimeout(() => {
+                router.push('/dashboard/student');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessModal, router]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Validation
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            setLoading(false);
-            return;
-        }
-
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+        // Validation - registration number must be at least 6 characters
+        if (formData.registrationNumber.length < 6) {
+            setError('Registration number must be at least 6 characters');
             setLoading(false);
             return;
         }
@@ -49,8 +56,28 @@ export default function RegisterPage() {
         try {
             // Use registration number as email format for students
             const email = `${formData.registrationNumber}@aliet.edu`;
+            // Use registration number as default password
+            const password = formData.registrationNumber;
 
-            await signUp(email, formData.password, {
+            // Check if student exists in database
+            let studentExists = false;
+            let existingStudentData = null;
+            const branches = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
+
+            for (const branch of branches) {
+                const studentRef = collection(db, `admin/students/${branch}`);
+                const q = query(studentRef, where('registrationNumber', '==', formData.registrationNumber));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    studentExists = true;
+                    existingStudentData = snapshot.docs[0].data();
+                    break;
+                }
+            }
+
+            // Create Firebase Auth account with registration number as password
+            await signUp(email, password, {
                 role: 'student',
                 name: formData.name,
                 registrationNumber: formData.registrationNumber,
@@ -61,7 +88,27 @@ export default function RegisterPage() {
                 year: formData.year,
             });
 
-            router.push('/dashboard/student');
+            // Create or update student profile in admin/students/{branch}
+            const studentProfileData = {
+                name: formData.name,
+                email: email,
+                registrationNumber: formData.registrationNumber,
+                branch: formData.branch,
+                department: formData.department,
+                section: formData.section,
+                year: formData.year,
+                mobileNumber: formData.mobileNumber,
+                role: 'student',
+                createdAt: existingStudentData?.createdAt || new Date(),
+                updatedAt: new Date()
+            };
+
+            // Store in the respective branch collection
+            const branchStudentRef = doc(collection(db, `admin/students/${formData.branch}`), formData.registrationNumber);
+            await setDoc(branchStudentRef, studentProfileData, { merge: true });
+
+            // Show success modal
+            setShowSuccessModal(true);
         } catch (err: any) {
             setError(err.message || 'Failed to create account');
         } finally {
@@ -256,41 +303,17 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Password */}
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <Lock className="w-5 h-5" />
-                                Security
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Password *
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        className="input-field"
-                                        placeholder="At least 6 characters"
-                                    />
-                                </div>
 
+                        {/* Password Info */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="flex items-start gap-3">
+                                <Lock className="w-5 h-5 text-blue-600 mt-0.5" />
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Confirm Password *
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={formData.confirmPassword}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, confirmPassword: e.target.value })
-                                        }
-                                        className="input-field"
-                                        placeholder="Re-enter password"
-                                    />
+                                    <h4 className="font-semibold text-blue-900 mb-1">Default Password</h4>
+                                    <p className="text-sm text-blue-700">
+                                        Your <strong>registration number</strong> will be used as your default password.
+                                        You can change it later from your dashboard settings.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -320,6 +343,53 @@ export default function RegisterPage() {
                     <p>© 2026 ALIET College. All rights reserved.</p>
                 </div>
             </div>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center animate-fadeIn">
+                        <div className="mb-6">
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+                                <CheckCircle className="w-12 h-12 text-green-600" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
+                            <p className="text-gray-600">
+                                Your account has been created successfully.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3 text-left bg-gray-50 rounded-lg p-4 mb-6">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Name:</span>
+                                <span className="font-medium text-gray-900">{formData.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Registration No:</span>
+                                <span className="font-medium text-gray-900">{formData.registrationNumber}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Branch:</span>
+                                <span className="font-medium text-gray-900">{formData.branch}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Year:</span>
+                                <span className="font-medium text-gray-900">{formData.year}</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => router.push('/dashboard/student')}
+                            className="w-full btn-primary py-3 text-lg font-semibold"
+                        >
+                            Go to Dashboard
+                        </button>
+
+                        <p className="text-sm text-gray-500 mt-4">
+                            Redirecting automatically in 3 seconds...
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
