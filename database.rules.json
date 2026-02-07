@@ -1,0 +1,21 @@
+{
+    "rules": {
+        "daily_attendance": {
+            ".read": "auth != null",
+            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'faculty' || root.child('users').child(auth.uid).child('role').val() == 'hod' || root.child('users').child(auth.uid).child('role').val() == 'admin')",
+            "$date": {
+                "$branch": {
+                    "$section": {
+                        "$year": {
+                            "students": {
+                                "$studentId": {
+                                    ".validate": "newData.hasChildren(['name', 'registrationNumber', 'status', 'markedBy', 'timestamp'])"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

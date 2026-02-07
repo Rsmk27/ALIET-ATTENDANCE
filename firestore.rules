@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && getUserRole() == 'student';
+    }
+    
+    function isFaculty() {
+      return isAuthenticated() && getUserRole() == 'faculty';
+    }
+    
+    function isHOD() {
+      return isAuthenticated() && getUserRole() == 'hod';
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    function isStaffOrAbove() {
+      return isFaculty() || isHOD() || isAdmin();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile
+      // Staff and above can read all profiles
+      allow read: if isOwner(userId) || isStaffOrAbove();
+      
+      // Users can create their own profile during registration
+      allow create: if isOwner(userId);
+      
+      // Users can update their own profile
+      // Admin can update any profile
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // Only admin can delete users
+      allow delete: if isAdmin();
+    }
+    
+    // Departments collection
+    match /departments/{departmentId} {
+      // Everyone can read departments
+      allow read: if isAuthenticated();
+      
+      // Only HOD and Admin can create/update/delete departments
+      allow write: if isHOD() || isAdmin();
+    }
+    
+    // Attendance records (archived)
+    match /attendance/{date}/{document=**} {
+      // Students can read their own attendance
+      // Faculty can read attendance for their classes
+      // HOD can read attendance for their department
+      // Admin can read all attendance
+      allow read: if isAuthenticated();
+      
+      // Only faculty, HOD, and admin can write attendance
+      allow write: if isStaffOrAbove();
+    }
+    
+    // Academic records
+    match /academic_records/{recordId} {
+      // Students can read their own records
+      // Faculty can read records for their classes
+      // HOD can read records for their department
+      // Admin can read all records
+      allow read: if isAuthenticated();
+      
+      // Only faculty, HOD, and admin can write academic records
+      allow create, update: if isStaffOrAbove();
+      
+      // Only admin can delete academic records
+      allow delete: if isAdmin();
+    }
+    
+    // Fee records
+    match /finance/{feeId} {
+      // Students can read their own fee records
+      // Staff can read all fee records
+      allow read: if isAuthenticated();
+      
+      // Only admin can write fee records
+      allow write: if isAdmin();
+    }
+    
+    // Announcements
+    match /announcements/{announcementId} {
+      // Everyone can read announcements
+      allow read: if isAuthenticated();
+      
+      // Institutional announcements: Only admin can create
+      // Departmental announcements: HOD and admin can create
+      allow create: if (isAdmin()) || 
+                      (isHOD() && request.resource.data.tier == 'departmental');
+      
+      // Only creator or admin can update/delete
+      allow update, delete: if isAdmin() || 
+                              (isHOD() && resource.data.createdBy == request.auth.uid);
+    }
+    
+    // Ratings
+    match /ratings/{ratingId} {
+      // Everyone can read ratings
+      allow read: if isAuthenticated();
+      
+      // Users can create ratings
+      allow create: if isAuthenticated();
+      
+      // Only creator can update their rating
+      allow update: if isOwner(resource.data.ratedBy);
+      
+      // Only admin can delete ratings
+      allow delete: if isAdmin();
+    }
+    
+    // Class sections
+    match /class_sections/{sectionId} {
+      // Everyone can read class sections
+      allow read: if isAuthenticated();
+      
+      // Only faculty, HOD, and admin can manage class sections
+      allow write: if isStaffOrAbove();
+    }
+  }
+}
