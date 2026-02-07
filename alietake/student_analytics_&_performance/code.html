@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Analytics &amp; Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .ticker-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-content {
+            display: inline-block;
+            animation: scroll 20s linear infinite;
+        }
+        @keyframes scroll {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white antialiased">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center border-2 border-primary" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB9yPr1uViuiQM3o2yVAz990ldW2Y6jWQBLOywFgo2CzBxsCHl18v-JeaITaOWjeulXuyd3N2ShdMnHStRYnIPaeViKmKzGeIXtw2GK-khddAFd9hUTSyPJIQVCO0WOVoHIA2S4M5_tcypr8JxTVq5ENq--_PHdQxlsEy1NP_qUb89z9YT8DkZuyGueFJf-aSRj58CKMWhM0CBx2kh8XBWAFk9_kwsGZDT1-0XEa7rCF3gMjwkGH8zq0z1Oczjj1uH1ti8WP0IFlCU");'></div>
+<div>
+<h1 class="text-sm font-bold leading-none">Alex Johnson</h1>
+<p class="text-[11px] text-gray-500 dark:text-gray-400">Junior - CS Major</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</button>
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 relative">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-red-500"></span>
+</button>
+</div>
+</div>
+</header>
+<div class="bg-primary/10 dark:bg-primary/20 py-1 border-y border-primary/20">
+<div class="ticker-container py-0.5">
+<p class="ticker-content text-[11px] font-medium text-primary uppercase tracking-wider">
+                📢 Mid-term results are live | 📢 Library hours extended until midnight for finals week | 📢 Career fair registration closes Friday
+            </p>
+</div>
+</div>
+<main class="p-4 space-y-4 pb-24">
+<section class="bg-white dark:bg-gray-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-base font-bold">Academic Health</h2>
+<span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-full uppercase">Good Standing</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center justify-center shrink-0">
+<svg class="w-24 h-24 transform -rotate-90">
+<circle class="text-gray-100 dark:text-gray-800" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="37.68" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xl font-bold">85%</span>
+<span class="text-[9px] text-gray-400">Attendance</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-gray-500">Assignment Completion</span>
+<span class="font-bold">92%</span>
+</div>
+<div class="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-gray-500">Quiz Average</span>
+<span class="font-bold">78%</span>
+</div>
+<div class="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400" style="width: 78%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white dark:bg-gray-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="text-base font-bold">Performance Trends</h2>
+<p class="text-xs text-gray-500">Semester Marks (%)</p>
+</div>
+<div class="text-right">
+<span class="text-2xl font-bold text-primary">78%</span>
+<span class="block text-[10px] text-green-500 font-bold">+5.2% from prev.</span>
+</div>
+</div>
+<div class="h-40 w-full">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 400 150">
+<defs>
+<linearGradient id="grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#137fec;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#137fec;stop-opacity:0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 100 Q 40 80, 80 90 T 160 50 T 240 70 T 320 30 T 400 60 V 150 H 0 Z" fill="url(#grad)"></path>
+<line class="dark:stroke-gray-800" stroke="#eee" stroke-dasharray="4" x1="0" x2="400" y1="0" y2="0"></line>
+<line class="dark:stroke-gray-800" stroke="#eee" stroke-dasharray="4" x1="0" x2="400" y1="50" y2="50"></line>
+<line class="dark:stroke-gray-800" stroke="#eee" stroke-dasharray="4" x1="0" x2="400" y1="100" y2="100"></line>
+<line class="dark:stroke-gray-800" stroke="#eee" stroke-dasharray="4" x1="0" x2="400" y1="150" y2="150"></line>
+<path d="M0 100 Q 40 80, 80 90 T 160 50 T 240 70 T 320 30 T 400 60" fill="none" stroke="#137fec" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="80" cy="90" fill="#137fec" r="4"></circle>
+<circle cx="160" cy="50" fill="#137fec" r="4"></circle>
+<circle cx="240" cy="70" fill="#137fec" r="4"></circle>
+<circle cx="320" cy="30" fill="#137fec" r="4"></circle>
+<circle cx="400" cy="60" fill="#137fec" r="4"></circle>
+</svg>
+<div class="flex justify-between mt-2 px-1 text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+<span>Jan</span>
+<span>Feb</span>
+<span>Mar</span>
+<span>Apr</span>
+<span>May</span>
+<span>Jun</span>
+</div>
+</div>
+</section>
+<section class="bg-white dark:bg-gray-900 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-base font-bold">Fee Summary</h2>
+<span class="flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]">schedule</span> Pending
+                </span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3 rounded-lg bg-background-light dark:bg-gray-800/50 border border-gray-50 dark:border-gray-800">
+<p class="text-[10px] text-gray-500 uppercase font-bold">Total Due</p>
+<p class="text-lg font-bold">$12,450</p>
+</div>
+<div class="p-3 rounded-lg bg-background-light dark:bg-gray-800/50 border border-gray-50 dark:border-gray-800">
+<p class="text-[10px] text-gray-500 uppercase font-bold">Paid</p>
+<p class="text-lg font-bold text-green-600">$8,000</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+<div>
+<p class="text-[10px] text-gray-500 uppercase font-bold">Balance Remaining</p>
+<p class="text-xl font-bold text-red-500">$4,450</p>
+</div>
+<button class="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2">
+                    Pay Now
+                    <span class="material-symbols-outlined text-[18px]">payments</span>
+</button>
+</div>
+<a class="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-primary py-2 rounded-lg border border-primary/20 bg-primary/5" href="#">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                Download Latest Receipt
+            </a>
+</section>
+<section class="grid grid-cols-2 gap-3">
+<button class="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+<div class="size-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div class="text-left">
+<p class="text-xs font-bold">Syllabus</p>
+<p class="text-[10px] text-gray-400">View modules</p>
+</div>
+</button>
+<button class="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+<div class="size-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined">event</span>
+</div>
+<div class="text-left">
+<p class="text-xs font-bold">Schedule</p>
+<p class="text-[10px] text-gray-400">Time table</p>
+</div>
+</button>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 pb-8 pt-2">
+<div class="flex justify-between items-center px-4">
+<a class="flex flex-1 flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[28px] fill-[1]">dashboard</span>
+<span class="text-[10px] font-bold text-center">Overview</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-gray-400" href="#">
+<span class="material-symbols-outlined text-[28px]">description</span>
+<span class="text-[10px] font-medium text-center">Exams</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-gray-400" href="#">
+<span class="material-symbols-outlined text-[28px]">chat_bubble</span>
+<span class="text-[10px] font-medium text-center">Faculty</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-gray-400" href="#">
+<span class="material-symbols-outlined text-[28px]">person</span>
+<span class="text-[10px] font-medium text-center">Profile</span>
+</a>
+</div>
+</nav>
+
+</body></html>

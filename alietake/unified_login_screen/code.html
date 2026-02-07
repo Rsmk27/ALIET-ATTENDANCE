@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Unified Login Screen - ALIETAKE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bg-pattern {
+            background-image: radial-gradient(#137fec15 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display">
+<!-- Subtle Architectural/Academic Background Pattern -->
+<div class="fixed inset-0 bg-pattern opacity-50 pointer-events-none"></div>
+<!-- Main Container (Safe Area for iOS) -->
+<main class="relative flex-1 flex flex-col max-w-[480px] mx-auto w-full px-6 py-12">
+<!-- Top App Bar / Branding -->
+<div class="flex flex-col items-center mb-10">
+<div class="bg-primary text-white p-3 rounded-xl shadow-lg mb-4">
+<span class="material-symbols-outlined text-4xl">school</span>
+</div>
+<h1 class="text-3xl font-bold text-[#111418] dark:text-white tracking-tight">ALIETAKE</h1>
+<p class="text-[#617589] dark:text-gray-400 text-sm mt-1">College Management Portal</p>
+</div>
+<!-- Unified Login Tabs -->
+<div class="bg-white dark:bg-[#1c2631] p-1 rounded-xl flex mb-8 shadow-sm border border-gray-200 dark:border-gray-800">
+<button class="flex-1 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white shadow-sm transition-all">
+                Student Login
+            </button>
+<button class="flex-1 py-2.5 text-sm font-semibold rounded-lg text-[#617589] dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                Institutional Login
+            </button>
+</div>
+<div class="flex flex-col gap-5">
+<h2 class="text-xl font-bold text-[#111418] dark:text-white">Welcome Back</h2>
+<!-- Registration Number Input -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Registration Number</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">badge</span>
+<input class="w-full pl-11 pr-4 py-4 bg-white dark:bg-[#1c2631] border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-[#111418] dark:text-white placeholder:text-gray-400" placeholder="Enter your Reg. No" type="text"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="text-sm font-medium text-[#111418] dark:text-gray-200">Password</label>
+<a class="text-xs font-semibold text-primary" href="#">Forgot Password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">lock</span>
+<input class="w-full pl-11 pr-12 py-4 bg-white dark:bg-[#1c2631] border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-[#111418] dark:text-white placeholder:text-gray-400" placeholder="Enter your password" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Sign In Button -->
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all mt-2">
+                Sign In
+            </button>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-2">
+<div class="h-[1px] flex-1 bg-gray-200 dark:bg-gray-800"></div>
+<span class="text-xs font-medium text-gray-400 uppercase tracking-widest">or continue with</span>
+<div class="h-[1px] flex-1 bg-gray-200 dark:bg-gray-800"></div>
+</div>
+<!-- Google Login -->
+<button class="w-full bg-white dark:bg-[#1c2631] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-[#111418] dark:text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-3 transition-all">
+<svg height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                Sign in with Google
+            </button>
+</div>
+<!-- Footer -->
+<div class="mt-auto pt-10 text-center">
+<p class="text-[#617589] dark:text-gray-400 text-sm">
+                First time user? 
+                <a class="text-primary font-bold ml-1 hover:underline" href="#">Register here</a>
+</p>
+<div class="mt-8 flex justify-center gap-6 opacity-40">
+<img alt="Partner Logo 1" class="h-8 w-auto grayscale rounded" data-alt="Monochrome professional corporate partner logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbMlFqct_BKE1nTdhDNJrKqMSBHTWoOJ8sai-pMPFuzJO6UGWVnsyu6IZUuFsZS-_rt0LtP6eBWI7S9XPnktAb4qgk29Yh6gvw4kivtEVFsSeZ6bbPHM89ughApWEfTAGOxkT1VUVyr6YBPOY_MsI40nr9KwtT2MrCtbH6GQvtDqVnrYp0TJkzLO7P83o2nV-jaseKc2IuZ8HYx1S4pmuZxSgNqJBOBR2U2WaxVoitXG_7E0P9Yz6xZAJIOO2t5Uy78iQxD-X1WBk"/>
+<img alt="Partner Logo 2" class="h-8 w-auto grayscale rounded" data-alt="Monochrome professional academic accreditation logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6BxfXFdIyNndtOgTIdAPYwD9Ema53JCIWjeN2_6FzTiQ-KFSqL157NBTtKfa2bQG8zH0dWMnNdn93s_LokjIFEsWG2q6-tbx35cRzyb7GF0Iie2-mvgZIjhCeUwE5mE61tv5uTir5HCuHezC46odhYN_mZ-nMWlBkiMkR1bO5v1LMjbifykMROaC33WUElxsebCkNKAvhVOJ8Xuwj__e3YggMXqdOjAntKSk0cZB0xlZFtoJyhhYXNbpEtb204XqPWi2TwvSdYso"/>
+</div>
+</div>
+<!-- iOS Home Indicator Spacing -->
+<div class="h-6"></div>
+</main>
+</body></html>

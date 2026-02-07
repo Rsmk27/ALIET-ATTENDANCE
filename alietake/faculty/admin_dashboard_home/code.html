@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Faculty Dashboard with Attendance Nav</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+            display: flex;
+            width: max-content;
+            animation: scroll 20s linear infinite;
+        }
+        .animate-scroll-slow {
+            display: flex;
+            width: max-content;
+            animation: scroll 30s linear infinite;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white min-h-screen">
+<header class="sticky top-0 z-30 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+<div class="flex items-center p-4 justify-between max-w-xl mx-auto">
+<div class="flex items-center gap-3">
+<button class="text-[#111418] dark:text-white flex size-10 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-tight">Faculty Dashboard</h2>
+</div>
+<div class="flex gap-2">
+<button class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="relative flex size-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-[#111418] dark:text-white">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-xl mx-auto pb-24">
+<div class="flex flex-col gap-1 py-2 overflow-hidden bg-white dark:bg-background-dark border-b border-gray-100 dark:border-gray-800">
+<div class="flex items-center bg-primary/5 dark:bg-primary/10 py-2 group">
+<div class="px-3 border-r border-primary/20 shrink-0 flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-sm">campaign</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Global</span>
+</div>
+<div class="overflow-hidden relative flex-1">
+<div class="animate-scroll whitespace-nowrap flex gap-8 px-4">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• Campus-wide holiday on Friday for Foundation Day</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• New research grants available - Apply by Oct 15</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• Annual cultural fest dates announced: Dec 12-15</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• Campus-wide holiday on Friday for Foundation Day</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• New research grants available - Apply by Oct 15</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">• Annual cultural fest dates announced: Dec 12-15</span>
+</div>
+</div>
+</div>
+<div class="flex items-center bg-gray-50 dark:bg-gray-900 py-2 group">
+<div class="px-3 border-r border-gray-200 dark:border-gray-700 shrink-0 flex items-center gap-1">
+<span class="material-symbols-outlined text-gray-500 text-sm">corporate_fare</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Dept</span>
+</div>
+<div class="overflow-hidden relative flex-1">
+<div class="animate-scroll-slow whitespace-nowrap flex gap-8 px-4">
+<span class="text-sm text-gray-600 dark:text-gray-400">• CS Dept meeting at 2 PM in Hall B</span>
+<span class="text-sm text-gray-600 dark:text-gray-400">• Submit mid-term marks for CS101 by EOD</span>
+<span class="text-sm text-gray-600 dark:text-gray-400">• New AI Lab equipment arrived and ready for setup</span>
+<span class="text-sm text-gray-600 dark:text-gray-400">• CS Dept meeting at 2 PM in Hall B</span>
+<span class="text-sm text-gray-600 dark:text-gray-400">• Submit mid-term marks for CS101 by EOD</span>
+<span class="text-sm text-gray-600 dark:text-gray-400">• New AI Lab equipment arrived and ready for setup</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 pt-6 pb-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Welcome back,</p>
+<h1 class="text-2xl font-bold text-[#111418] dark:text-white">Prof. Sarah Mitchell</h1>
+</div>
+<div class="px-4 mb-6">
+<div class="bg-primary rounded-xl p-4 text-white shadow-lg shadow-primary/20 flex justify-between items-center">
+<div class="flex flex-col">
+<span class="text-xs font-medium opacity-80 uppercase tracking-widest">Next Class</span>
+<span class="text-lg font-bold leading-tight">Advanced Algorithms (CS302)</span>
+<span class="text-sm opacity-90">10:30 AM • Room 402</span>
+</div>
+<div class="bg-white/20 rounded-lg p-2">
+<span class="material-symbols-outlined text-3xl">event_upcoming</span>
+</div>
+</div>
+</div>
+<div class="px-4">
+<h3 class="text-[#111418] dark:text-white text-base font-bold mb-4">Quick Actions</h3>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-start p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow text-left">
+<div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-2xl">how_to_reg</span>
+</div>
+<span class="text-[#111418] dark:text-white font-bold text-sm">Mark Attendance</span>
+<span class="text-[#617589] dark:text-gray-400 text-xs mt-1">Current Class: CS101</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow text-left">
+<div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-2xl">insights</span>
+</div>
+<span class="text-[#111418] dark:text-white font-bold text-sm">View Analytics</span>
+<span class="text-[#617589] dark:text-gray-400 text-xs mt-1">Class performance</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow text-left">
+<div class="w-12 h-12 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-2xl">group_add</span>
+</div>
+<span class="text-[#111418] dark:text-white font-bold text-sm">Manage Students</span>
+<span class="text-[#617589] dark:text-gray-400 text-xs mt-1">Enrollment &amp; Profiles</span>
+</button>
+<button class="flex flex-col items-start p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow text-left">
+<div class="w-12 h-12 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-2xl">calendar_month</span>
+</div>
+<span class="text-[#111418] dark:text-white font-bold text-sm">Schedule</span>
+<span class="text-[#617589] dark:text-gray-400 text-xs mt-1">Full Weekly Timetable</span>
+</button>
+</div>
+</div>
+<div class="px-4 mt-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-[#111418] dark:text-white text-base font-bold">Pending Approvals</h3>
+<button class="text-primary text-sm font-bold">View All</button>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+<div class="size-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Student profile picture of Alex Johnson" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4n83Z-984oQvbE_VBOUGPt0ErO42Ay9vA8FGuk0IRcTETcoqrBU9jViVZTgKNC37ct-8eOFCjxq-15RifUUZCbMWgiTtbvfJP5yM1NoMJsjnO1QHv3zsQHLLadsemi9cDY_h1Tesh3IuYN2uBtXGX2zdk_tSRRRiqFHpgWEHUc3sVyfIaYoPHKzb563RFdMogWTqiq05JR55KlZge4J1aQC0MMrzNFk1TQe7D8_SggUANs4wE_ZOu5FDTgq_9mGKfNFizaSK-M1M"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold truncate">Alex Johnson</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Leave Request • Medical</p>
+</div>
+<div class="flex gap-2">
+<button class="size-8 flex items-center justify-center rounded-lg bg-green-100 text-green-600">
+<span class="material-symbols-outlined text-sm">check</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+<div class="size-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Student profile picture of Maria Garcia" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlmse1N8hbbm1lcBaXkhjbSfT9kF2wF8GVNwx9nWugpqoWh8reSk3bYEey8w1EBAXaoCaEyoxkE5HVol1FpvahsdKYt5Qjw7K1GNKcygc2PUZ2il9hwuKiw_ngwQPCU9DHqbJT9Gk0hZSRC2PkEzhFaf-aw1oq0EM7QAKFjhK8QQzCaYwIy2PV3b--I-pSzzAGKzR2Oxbgm6vLMZetBmSb6c5NZiYbwrWc5pUY1oXEGoU8vLXsWD4owI3UYmO7G5wiVUYzrlmJhIk"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold truncate">Maria Garcia</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Exam Retake Request</p>
+</div>
+<div class="flex gap-2">
+<button class="size-8 flex items-center justify-center rounded-lg bg-green-100 text-green-600">
+<span class="material-symbols-outlined text-sm">check</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 px-6 py-2 pb-8 z-40 max-w-xl mx-auto flex justify-between">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-600">
+<span class="material-symbols-outlined text-[24px]">how_to_reg</span>
+<span class="text-[10px] font-medium">Mark Attendance</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-600">
+<span class="material-symbols-outlined text-[24px]">contact_page</span>
+<span class="text-[10px] font-medium">Reports</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-600">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</nav>
+<div class="fixed inset-0 bg-black/50 z-50 transition-opacity pointer-events-none opacity-0" id="sidebar">
+<div class="w-[280px] h-full bg-white dark:bg-background-dark shadow-2xl transition-transform -translate-x-full">
+<div class="p-6 border-b border-gray-100 dark:border-gray-800">
+<div class="size-16 rounded-xl bg-primary mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<h3 class="font-bold text-lg">EduConnect Admin</h3>
+<p class="text-sm text-gray-500">v2.4.0 • Enterprise Edition</p>
+</div>
+<div class="py-4 px-2">
+<a class="flex items-center gap-4 px-4 py-3 bg-primary/10 text-primary rounded-lg font-bold" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">schedule</span>
+                    My Schedule
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">folder_shared</span>
+                    Student Records
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">assessment</span>
+                    Dept Reports
+                </a>
+<div class="my-4 border-t border-gray-100 dark:border-gray-800"></div>
+<a class="flex items-center gap-4 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Sign Out
+                </a>
+</div>
+</div>
+</div>
+
+</body></html>
