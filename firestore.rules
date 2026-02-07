@@ -139,11 +139,14 @@ service cloud.firestore {
 
     // Admin Student Records (for registration and management)
     match /admin/students/{branch}/{studentId} {
-      // Allow public read so registration page can check if student exists
-      allow read: if true;
+      // Allow public to get specific student record by ID (needed for registration verification)
+      allow get: if true;
       
-      // Allow write if authenticated (registration or admin)
-      allow write: if isAuthenticated();
+      // Only admin can list all students (prevents database dumping)
+      allow list: if isAdmin();
+      
+      // Only admin can modify student records
+      allow write: if isAdmin();
     }
   }
 }

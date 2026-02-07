@@ -10,6 +10,9 @@ A comprehensive web application for college attendance tracking, academic perfor
 -   **Faculty Overview**: Complete faculty directory with department-wise organization
 -   **Search & Filter**: Advanced search by name, email, registration number, or employee ID
 -   **Data Import Tool**: Easy import of student data from JSON files with progress tracking
+-   **Real-Time Updates**: Live monitoring of student registrations and logins via Firestore listeners
+-   **Dark Mode**: Full support for light and dark themes with persistent preference storage
+-   **Spotlight UI**: Exclusive interactive cursor effect for the admin interface
 
 ### 🎓 Attendance Management
 -   **Smart Filtering**: Dynamically filter students by **Branch**, **Year**, and **Section**.
@@ -80,12 +83,15 @@ ALIET-ATTENDANCE/
 │   ├── login/             # Login Page
 │   ├── register/          # Registration Page
 │   ├── dashboard/         # Role-based Dashboards
+│   │   ├── admin/         # Admin Dashboard (Updated with Real-time & Dark Mode)
+│   │   │   └── page.tsx      # Main Admin View
 │   │   ├── faculty/       # Faculty Attendance & Marks
 │   │   ├── student/       # Student Portal
-│   │   └── admin/         # Admin Dashboard (NEW!)
+│   │   └── page.tsx       # Dashboard Layout/Redirect
 │   └── import-students/   # Student Import Tool (NEW!)
 ├── components/            # Reusable UI Components
 │   ├── auth/             # RoleModal, ProtectedRoute
+│   ├── ui/               # SpotlightCursor, Buttons, Cards
 │   └── announcements/    # Ticker Components
 ├── data/                 # Static Data (Student Registry)
 │   └── students.json     # Student Database
@@ -94,6 +100,24 @@ ALIET-ATTENDANCE/
 ├── utils/                # Helper Logic (Branch Detector)
 └── types/                # TypeScript Interfaces
 ```
+
+## 🌐 Website Sitemap
+
+-   **/** (Auto-redirects to Login)
+-   **/login** - Authentication Portal (Student/Faculty/Admin)
+-   **/register** - New User Registration
+-   **/dashboard**:
+    -   **/admin** - Administrator Controls
+        -   *User Management*
+        -   *Branch Analytics*
+        -   *Activity Logs*
+    -   **/faculty** - Faculty Portal
+        -   *Attendance Marking*
+        -   *Student Overview*
+    -   **/student** - Student Portal
+        -   *Attendance History*
+        -   *Academic Performance*
+-   **/import-students** - Bulk Data Import Tool
 
 ## 🔒 Firebase Structure
 
