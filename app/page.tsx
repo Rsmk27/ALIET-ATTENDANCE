@@ -7,12 +7,7 @@ export default function Home() {
     const router = useRouter();
 
     useEffect(() => {
-        // Use a small timeout to ensure the router is ready
-        const timer = setTimeout(() => {
-            router.push('/login');
-        }, 100);
-
-        return () => clearTimeout(timer);
+        router.replace('/login');
     }, [router]);
 
     return (
