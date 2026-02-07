@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Users, GraduationCap, Building2, LogOut, Search, Filter } from 'lucide-react';
+import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun } from 'lucide-react';
 
 interface Student {
     uid: string;
@@ -37,6 +37,7 @@ function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<'students' | 'faculty'>('students');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterBranch, setFilterBranch] = useState('all');
+    const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -89,6 +90,15 @@ function AdminDashboard() {
         router.push('/login');
     };
 
+    const toggleTheme = () => {
+        setDarkMode(!darkMode);
+        if (!darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    };
+
     const filteredStudents = students.filter(student => {
         const matchesSearch =
             student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,22 +125,41 @@ function AdminDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['admin']}>
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 {/* Header */}
-                <div className="bg-white shadow-sm border-b">
+                <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center py-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                                <p className="text-sm text-gray-600">Welcome, {currentUser?.name}</p>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Welcome, {currentUser?.name}</p>
                             </div>
-                            <button
-                                onClick={handleSignOut}
-                                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <LogOut className="w-5 h-5" />
-                                <span>Sign Out</span>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={toggleTheme}
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                >
+                                    {darkMode ? (
+                                        <>
+                                            <Sun className="w-5 h-5" />
+                                            <span className="hidden sm:inline">Light</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Moon className="w-5 h-5" />
+                                            <span className="hidden sm:inline">Dark</span>
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <LogOut className="w-5 h-5" />
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

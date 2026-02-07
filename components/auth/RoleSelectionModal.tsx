@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import { X } from 'lucide-react';
 import { detectBranchInfo } from '@/utils/branchDetector';
 import studentData from '@/data/students.json';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 interface RoleSelectionModalProps {
     isOpen: boolean;
@@ -18,7 +20,7 @@ export default function RoleSelectionModal({
     onClose,
     onComplete,
 }: RoleSelectionModalProps) {
-    const { updateUserProfile } = useAuth();
+    const { updateUserProfile, currentUser } = useAuth();
     const [step, setStep] = useState<'role' | 'details'>('role');
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
     const [formData, setFormData] = useState({
@@ -26,6 +28,7 @@ export default function RoleSelectionModal({
         registrationNumber: '',
         employeeId: '',
         mobileNumber: '',
+        emailId: '',
         department: '',
         branch: '',
         section: '',
@@ -35,6 +38,18 @@ export default function RoleSelectionModal({
     const [error, setError] = useState('');
     const [branchWarning, setBranchWarning] = useState('');
     const [entryType, setEntryType] = useState<string | undefined>('');
+    const [mobileNumberLocked, setMobileNumberLocked] = useState(false);
+
+    useEffect(() => {
+        // Check if mobile number was already updated
+        if (currentUser?.mobileNumber) {
+            setMobileNumberLocked(true);
+            setFormData(prev => ({ ...prev, mobileNumber: currentUser.mobileNumber || '' }));
+        }
+        if (currentUser?.emailId) {
+            setFormData(prev => ({ ...prev, emailId: currentUser.emailId || '' }));
+        }
+    }, [currentUser]);
 
     if (!isOpen) return null;
 
@@ -43,16 +58,58 @@ export default function RoleSelectionModal({
         setStep('details');
     };
 
+    const checkDuplicates = async (mobile: string, email: string) => {
+        try {
+            // Check for duplicate mobile number
+            if (mobile && mobile !== currentUser?.mobileNumber) {
+                const mobileQuery = query(
+                    collection(db, 'users'),
+                    where('mobileNumber', '==', mobile)
+                );
+                const mobileSnapshot = await getDocs(mobileQuery);
+                if (!mobileSnapshot.empty) {
+                    return 'This mobile number is already registered';
+                }
+            }
+
+            // Check for duplicate email
+            if (email && email !== currentUser?.emailId) {
+                const emailQuery = query(
+                    collection(db, 'users'),
+                    where('emailId', '==', email)
+                );
+                const emailSnapshot = await getDocs(emailQuery);
+                if (!emailSnapshot.empty) {
+                    return 'This email ID is already registered';
+                }
+            }
+
+            return null;
+        } catch (err) {
+            console.error('Error checking duplicates:', err);
+            return null;
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
+            // Check for duplicates
+            const duplicateError = await checkDuplicates(formData.mobileNumber, formData.emailId);
+            if (duplicateError) {
+                setError(duplicateError);
+                setLoading(false);
+                return;
+            }
+
             const profileData: any = {
                 role: selectedRole,
                 name: formData.name,
                 mobileNumber: formData.mobileNumber,
+                emailId: formData.emailId,
             };
 
             if (selectedRole === 'student') {
@@ -76,8 +133,8 @@ export default function RoleSelectionModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-4 md:p-6 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-4 md:p-6 relative my-8 max-h-[90vh] overflow-y-auto">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -347,8 +404,31 @@ export default function RoleSelectionModal({
                                     onChange={(e) =>
                                         setFormData({ ...formData, mobileNumber: e.target.value })
                                     }
-                                    className="input-field"
+                                    className={`input-field ${mobileNumberLocked ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
                                     placeholder="10-digit mobile number"
+                                    disabled={mobileNumberLocked}
+                                    readOnly={mobileNumberLocked}
+                                />
+                                {mobileNumberLocked && (
+                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                        ⚠️ Mobile number can only be set once and cannot be changed
+                                    </p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                    Email ID *
+                                </label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={formData.emailId}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, emailId: e.target.value })
+                                    }
+                                    className="input-field"
+                                    placeholder="your.email@example.com"
                                 />
                             </div>
 

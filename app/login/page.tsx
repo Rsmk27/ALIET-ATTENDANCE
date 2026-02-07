@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import RoleSelectionModal from '@/components/auth/RoleSelectionModal';
 import { GraduationCap, Building2, Mail, Lock, User, Phone } from 'lucide-react';
 import Image from 'next/image';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 type LoginMode = 'student' | 'institutional';
 
@@ -16,6 +18,8 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showRoleModal, setShowRoleModal] = useState(false);
+    const [studentName, setStudentName] = useState('');
+    const [lookingUp, setLookingUp] = useState(false);
 
     // Student login form
     const [studentForm, setStudentForm] = useState({
@@ -29,6 +33,47 @@ export default function LoginPage() {
         password: '',
     });
 
+    // Lookup student name when registration number changes
+    useEffect(() => {
+        const lookupStudent = async () => {
+            const regNo = studentForm.registrationNumber.toUpperCase().trim();
+
+            if (regNo.length < 8) {
+                setStudentName('');
+                return;
+            }
+
+            setLookingUp(true);
+            try {
+                // Search in all branch collections
+                const branches = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
+
+                for (const branch of branches) {
+                    const studentRef = collection(db, `admin/students/${branch}`);
+                    const q = query(studentRef, where('registrationNumber', '==', regNo));
+                    const snapshot = await getDocs(q);
+
+                    if (!snapshot.empty) {
+                        const studentData = snapshot.docs[0].data();
+                        setStudentName(studentData.name || '');
+                        setLookingUp(false);
+                        return;
+                    }
+                }
+
+                setStudentName('');
+            } catch (err) {
+                console.error('Error looking up student:', err);
+                setStudentName('');
+            } finally {
+                setLookingUp(false);
+            }
+        };
+
+        const timeoutId = setTimeout(lookupStudent, 500);
+        return () => clearTimeout(timeoutId);
+    }, [studentForm.registrationNumber]);
+
     const handleStudentLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -40,7 +85,12 @@ export default function LoginPage() {
             await signIn(email, studentForm.password);
             router.push('/dashboard/student');
         } catch (err: any) {
-            setError(err.message || 'Failed to sign in');
+            // Show user-friendly error message
+            if (err.message?.includes('auth/invalid-credential') || err.message?.includes('auth/user-not-found')) {
+                setError('Student not found. Please check your registration number and password.');
+            } else {
+                setError(err.message || 'Failed to sign in');
+            }
         } finally {
             setLoading(false);
         }
@@ -56,7 +106,12 @@ export default function LoginPage() {
             // Will redirect based on user role in ProtectedRoute
             router.push('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Failed to sign in');
+            // Show user-friendly error message
+            if (err.message?.includes('auth/invalid-credential') || err.message?.includes('auth/user-not-found')) {
+                setError('Invalid email or password. Please try again.');
+            } else {
+                setError(err.message || 'Failed to sign in');
+            }
         } finally {
             setLoading(false);
         }

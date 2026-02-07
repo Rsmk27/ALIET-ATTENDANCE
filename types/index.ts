@@ -13,6 +13,7 @@ export interface User {
     registrationNumber?: string; // Student
     employeeId?: string; // Faculty/HOD/Admin
     mobileNumber?: string;
+    emailId?: string; // Personal email ID
     department?: string;
     branch?: string;
     section?: string;
