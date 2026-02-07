@@ -51,7 +51,7 @@ function AdminDashboard() {
 
             for (const branch of branches) {
                 try {
-                    const branchRef = collection(db, 'admin', 'students', branch);
+                    const branchRef = collection(db, `admin/students/${branch}`);
                     const branchSnapshot = await getDocs(branchRef);
                     const branchStudents = branchSnapshot.docs.map(doc => ({
                         uid: doc.id,

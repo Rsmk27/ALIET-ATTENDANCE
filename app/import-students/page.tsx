@@ -58,8 +58,9 @@ export default function ImportStudentsPage() {
                         updatedAt: new Date()
                     };
 
-                    // Store in /admin/students/EEE/{registrationNumber}
-                    await setDoc(doc(db, 'admin', 'students', 'EEE', regNo), studentData);
+                    // Store in collection: admin/students/EEE
+                    const studentRef = doc(collection(db, 'admin/students/EEE'), regNo);
+                    await setDoc(studentRef, studentData);
 
                     successCount++;
                     setProgress({ current: i + 1, total: entries.length });
@@ -77,11 +78,6 @@ export default function ImportStudentsPage() {
             setImporting(false);
         }
     };
-
-    if (!currentUser) {
-        router.push('/login');
-        return null;
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center p-4">
