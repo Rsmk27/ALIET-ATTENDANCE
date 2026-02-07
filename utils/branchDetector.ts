@@ -54,17 +54,18 @@ export const detectBranchInfo = (regNo: string): BranchDetectionResult => {
             return result;
         }
 
-        // Calculate Year logic
+        // Calculate Year logic using Fixed Anchor (2025-2026 Academic Year)
+        // 25 Batch -> 1st Year
+        // 24 Batch -> 2nd Year (Regular) / 3rd Year (Lateral 24HP5A...)
+        // 23 Batch -> 3rd Year
+        // 22 Batch -> 4th Year
+        const startYearPrefix = 25; // The prefix for 1st Year students in 2025-26
         const joinYear = parseInt(yearStr, 10);
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear() % 100;
-        const currentMonth = currentDate.getMonth(); // 0-11
 
-        // Academic Year starts in June (Month 5)
-        let academicYear = currentYear - joinYear;
-        if (currentMonth >= 5) {
-            academicYear += 1;
-        }
+        // Calculate basic year (1 based)
+        // e.g., 24 - 24 + 1 = 1
+        // e.g., 24 - 23 + 1 = 2
+        let academicYear = startYearPrefix - joinYear + 1;
 
         result.calculatedYear = academicYear;
     }

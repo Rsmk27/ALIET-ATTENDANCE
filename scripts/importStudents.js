@@ -38,9 +38,21 @@ const studentsData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
 function parseRegistrationNumber(regNo) {
     const yearPrefix = regNo.substring(0, 2);
-    const year = yearPrefix === '23' ? 2 : yearPrefix === '24' ? 1 : 2;
     const sectionPart = regNo.substring(4, 6);
     const section = sectionPart === '1A' ? 'A' : sectionPart === '5A' ? 'A' : 'A';
+
+    // Logic matching utils/branchDetector.ts (2025-26 Academic Year)
+    const startYearPrefix = 25;
+    let year = startYearPrefix - parseInt(yearPrefix, 10) + 1;
+
+    // Lateral Entry (+1 Year)
+    if (sectionPart === '5A') {
+        year += 1;
+    }
+
+    // Clamp to 1-4
+    year = Math.max(1, Math.min(4, year));
+
     return { year, section };
 }
 
@@ -74,7 +86,7 @@ async function importStudents() {
 
             // Store in admin/students/{BRANCH} collection
             const studentRef = doc(collection(db, `admin/students/${branch}`), regNo);
-            await setDoc(studentRef, studentData);
+            await setDoc(studentRef, studentData, { merge: true });
 
             successCount++;
             console.log(`✅ [${successCount}/${entries.length}] Imported: ${name} (${regNo})`);

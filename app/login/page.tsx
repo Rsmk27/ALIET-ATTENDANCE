@@ -8,6 +8,7 @@ import { GraduationCap, Building2, Mail, Lock, User, Phone } from 'lucide-react'
 import Image from 'next/image';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import studentData from '@/data/students.json';
 
 type LoginMode = 'student' | 'institutional';
 
@@ -61,7 +62,15 @@ export default function LoginPage() {
                     }
                 }
 
-                setStudentName('');
+                // Fallback: Check local students.json
+                const localName = (studentData as any)[regNo];
+                if (localName) {
+                    setStudentName(`${localName} (Not Registered)`);
+                    setError('Student found in college list but not registered. Please Register first.');
+                } else {
+                    setStudentName('');
+                }
+
             } catch (err) {
                 console.error('Error looking up student:', err);
                 setStudentName('');
@@ -85,9 +94,14 @@ export default function LoginPage() {
             await signIn(email, studentForm.password);
             router.push('/dashboard/student');
         } catch (err: any) {
-            // Show user-friendly error message
-            if (err.message?.includes('auth/invalid-credential') || err.message?.includes('auth/user-not-found')) {
-                setError('Student not found. Please check your registration number and password.');
+            // Check if student exists in college list but account not created
+            const regNo = studentForm.registrationNumber.toUpperCase();
+            const existsInRegistry = (studentData as any)[regNo];
+
+            if (existsInRegistry && (err.message?.includes('auth/user-not-found') || err.message?.includes('auth/invalid-credential'))) {
+                setError('Account not activated. Please click "Register" below to create your password.');
+            } else if (err.message?.includes('auth/invalid-credential') || err.message?.includes('auth/user-not-found')) {
+                setError('Invalid registration number or password.');
             } else {
                 setError(err.message || 'Failed to sign in');
             }
@@ -212,19 +226,24 @@ export default function LoginPage() {
                                     />
                                 </div>
                                 {lookingUp && studentForm.registrationNumber.length >= 8 && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        🔍 Looking up student...
+                                    <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                                        <span className="animate-spin">⌛</span> Looking up student...
                                     </p>
                                 )}
                                 {studentName && !lookingUp && (
-                                    <p className="text-sm text-green-600 font-medium mt-1 flex items-center gap-1">
-                                        ✓ {studentName}
-                                    </p>
+                                    <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-100">
+                                        <p className="text-sm text-green-700 font-medium flex items-center gap-2">
+                                            ✓ {studentName}
+                                        </p>
+                                    </div>
                                 )}
-                                {!studentName && !lookingUp && studentForm.registrationNumber.length >= 8 && (
-                                    <p className="text-xs text-amber-600 mt-1">
-                                        ⚠️ Student not found in database
-                                    </p>
+                                {!studentName && !lookingUp && studentForm.registrationNumber.length >= 10 && (
+                                    <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
+                                        <p className="text-xs text-amber-700 flex items-center gap-1">
+                                            ⚠️ Student not found in database.
+                                            <span className="block mt-1 font-medium">Please verify or register.</span>
+                                        </p>
+                                    </div>
                                 )}
                             </div>
 
