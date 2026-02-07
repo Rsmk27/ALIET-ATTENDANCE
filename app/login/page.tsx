@@ -211,6 +211,21 @@ export default function LoginPage() {
                                         placeholder="Enter your registration number"
                                     />
                                 </div>
+                                {lookingUp && studentForm.registrationNumber.length >= 8 && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        🔍 Looking up student...
+                                    </p>
+                                )}
+                                {studentName && !lookingUp && (
+                                    <p className="text-sm text-green-600 font-medium mt-1 flex items-center gap-1">
+                                        ✓ {studentName}
+                                    </p>
+                                )}
+                                {!studentName && !lookingUp && studentForm.registrationNumber.length >= 8 && (
+                                    <p className="text-xs text-amber-600 mt-1">
+                                        ⚠️ Student not found in database
+                                    </p>
+                                )}
                             </div>
 
                             <div>
