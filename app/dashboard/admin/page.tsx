@@ -361,9 +361,7 @@ function AdminDashboard() {
                                                     <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Registration No.
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Email
-                                                    </th>
+
                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Branch
                                                     </th>
@@ -381,7 +379,7 @@ function AdminDashboard() {
                                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                                 {filteredStudents.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                                             No students found
                                                         </td>
                                                     </tr>
@@ -395,9 +393,7 @@ function AdminDashboard() {
                                                             <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                                                 <div className="text-sm text-gray-900 dark:text-gray-100">{student.registrationNumber || '-'}</div>
                                                             </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="text-sm text-gray-600 dark:text-gray-300">{student.email}</div>
-                                                            </td>
+
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
                                                                     {student.branch || '-'}
@@ -427,9 +423,7 @@ function AdminDashboard() {
                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Employee ID
                                                     </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Email
-                                                    </th>
+
                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Department
                                                     </th>
@@ -441,7 +435,7 @@ function AdminDashboard() {
                                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                                 {filteredFaculty.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
                                                             No faculty found
                                                         </td>
                                                     </tr>
@@ -454,9 +448,7 @@ function AdminDashboard() {
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <div className="text-sm text-gray-900 dark:text-gray-100">{member.employeeId || '-'}</div>
                                                             </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="text-sm text-gray-600 dark:text-gray-300">{member.email}</div>
-                                                            </td>
+
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-secondary-100 text-secondary-800">
                                                                     {member.department || '-'}
