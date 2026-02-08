@@ -3,10 +3,10 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { User, BarChart3, Presentation } from 'lucide-react';
+import { User, BarChart3, Presentation, LogOut } from 'lucide-react';
 
 export default function FacultyDashboard() {
-    const { currentUser, loading } = useAuth();
+    const { currentUser, loading, signOut } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -15,12 +15,29 @@ export default function FacultyDashboard() {
         }
     }, [currentUser, loading, router]);
 
+    const handleLogout = async () => {
+        if (confirm('Are you sure you want to logout?')) {
+            await signOut();
+            router.push('/login');
+        }
+    };
+
     if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
     if (!currentUser || currentUser.role !== 'faculty') return null;
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">Faculty Dashboard</h1>
+            {/* Header with Logout */}
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-gray-900">Faculty Dashboard</h1>
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm"
+                >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Logout</span>
+                </button>
+            </div>
 
             {/* Profile Card */}
             <div
