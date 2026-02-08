@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { User } from 'lucide-react';
 
 export default function FacultyDashboard() {
     const { currentUser, loading } = useAuth();
@@ -27,8 +28,24 @@ export default function FacultyDashboard() {
     return (
         <div className="p-8">
             <h1 className="text-3xl font-bold mb-6">Faculty Dashboard</h1>
+
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+                <div
+                    className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => router.push('/dashboard/faculty/profile')}
+                >
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                        <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-900">{currentUser.name}</h2>
+                        <p className="text-gray-600 text-sm">{currentUser.employeeId}</p>
+                    </div>
+                </div>
+            </div>
+
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h2 className="text-xl font-semibold mb-4">Welcome, {currentUser.name}</h2>
+                <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
                 <p className="text-gray-600 mb-4">Manage your classes and mark attendance here.</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
