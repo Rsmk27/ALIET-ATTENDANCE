@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message><BucketName>multimodal-storage-prod</BucketName><RequestId>KCX46ES2TMDW7ES8</RequestId><HostId>TvTXrLGvshVUNAQvJOWhLj8V90N4PCTp7XLNrLNZygK+Zmj3llSKYzWKKLFeyhcGnF26jThfD5mDthWwlefQiW/jslPB572d</HostId></Error>

@@ -16,9 +16,66 @@ import {
     Lock,
 } from 'lucide-react';
 
+import { db } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+
 export default function StudentDashboard() {
     const { currentUser, signOut } = useAuth();
     const router = useRouter();
+    const [attendanceStats, setAttendanceStats] = useState({ percent: 0, classes: 0, present: 0 });
+
+    useEffect(() => {
+        const fetchAttendance = async () => {
+            if (!currentUser?.branch || !currentUser?.registrationNumber) return;
+
+            try {
+                // Query attendance records for this student's class
+                // Matching Branch, Year (and Section if user has it)
+                // Note: If Year is missing, we might match wrong query.
+                // Assuming Year is stored as Number in both.
+
+                const constraints = [
+                    where('branch', '==', currentUser.branch),
+                    where('year', '==', currentUser.year)
+                ];
+
+                if (currentUser.section) {
+                    constraints.push(where('section', '==', currentUser.section));
+                }
+
+                const q = query(collection(db, 'attendance'), ...constraints);
+                const snapshot = await getDocs(q);
+
+                let total = 0;
+                let present = 0;
+
+                const regNo = currentUser.registrationNumber!;
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const studentStatus = data.records?.[regNo];
+
+                    if (studentStatus) {
+                        total++;
+                        if (studentStatus === 'Present') {
+                            present++;
+                        }
+                    }
+                });
+
+                setAttendanceStats({
+                    percent: total > 0 ? Math.round((present / total) * 100) : 0,
+                    classes: total,
+                    present: present
+                });
+
+            } catch (error) {
+                console.error("Error fetching attendance:", error);
+            }
+        };
+
+        fetchAttendance();
+    }, [currentUser]);
 
 
     const handleSignOut = async () => {
@@ -84,10 +141,10 @@ export default function StudentDashboard() {
                                 <div className="p-3 bg-green-100 rounded-lg">
                                     <Calendar className="w-6 h-6 text-green-600" />
                                 </div>
-                                <span className="text-2xl font-bold text-green-600">85%</span>
+                                <span className="text-2xl font-bold text-green-600">{attendanceStats.percent}%</span>
                             </div>
                             <h3 className="text-gray-600 text-sm font-medium">Attendance</h3>
-                            <p className="text-gray-500 text-xs mt-1">Overall percentage</p>
+                            <p className="text-gray-500 text-xs mt-1">Overall percentage ({attendanceStats.present}/{attendanceStats.classes})</p>
                         </div>
 
                         <div className="card-hover">
