@@ -9,19 +9,23 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
     title: "ALIETAKE - College Management System",
     description: "Comprehensive college management system for attendance, academics, and fee management",
-    applicationName: "ALIET Attendance",
+    applicationName: "ALIETAKE",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
-        title: "ALIET Attendance",
+        title: "ALIETAKE",
     },
     formatDetection: {
         telephone: false,
     },
+    icons: {
+        icon: '/logo.png',
+        apple: '/logo.png',
+    },
 };
 
 export const viewport: Viewport = {
-    themeColor: "#2563eb",
+    themeColor: "#1E88E5",
 };
 
 export default function RootLayout({
