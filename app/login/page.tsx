@@ -239,7 +239,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 flex flex-col items-center py-12 px-4 overflow-y-auto">
             <div className="w-full max-w-md">
                 {/* Logo and Title */}
                 <div className="text-center mb-8">
@@ -479,7 +479,40 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <div className="text-center mt-6 text-primary-100 text-sm">
-                    <p>© 2026 ALIET College. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} ALIET College. All rights reserved.</p>
+                </div>
+            </div>
+
+            {/* Excellence in Numbers Banner */}
+            <div className="w-full max-w-5xl mt-12 mb-24 md:mb-12 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl mx-4">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">Excellence in Numbers</h2>
+                        <p className="text-gray-500 mt-2 font-medium">Milestones that define our journey</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-y-8 gap-x-4 text-center divide-x-0 md:divide-x divide-gray-100">
+                        <div className="flex flex-col items-center group">
+                            <span className="text-3xl md:text-4xl font-extrabold text-primary-700 group-hover:scale-110 transition-transform">16</span>
+                            <span className="text-xs md:text-sm text-gray-500 mt-2 font-medium uppercase tracking-wide">Years of Excellence</span>
+                        </div>
+                        <div className="flex flex-col items-center group">
+                            <span className="text-3xl md:text-4xl font-extrabold text-teal-600 group-hover:scale-110 transition-transform">636</span>
+                            <span className="text-xs md:text-sm text-gray-500 mt-2 font-medium uppercase tracking-wide">Total B.Tech Seats</span>
+                        </div>
+                        <div className="flex flex-col items-center group">
+                            <span className="text-3xl md:text-4xl font-extrabold text-primary-700 group-hover:scale-110 transition-transform">138</span>
+                            <span className="text-xs md:text-sm text-gray-500 mt-2 font-medium uppercase tracking-wide">Expert Faculty</span>
+                        </div>
+                        <div className="flex flex-col items-center group">
+                            <span className="text-3xl md:text-4xl font-extrabold text-teal-600 group-hover:scale-110 transition-transform">3000</span>
+                            <span className="text-xs md:text-sm text-gray-500 mt-2 font-medium uppercase tracking-wide">Students Trained</span>
+                        </div>
+                        <div className="flex flex-col items-center group col-span-2 md:col-span-1">
+                            <span className="text-3xl md:text-4xl font-extrabold text-primary-700 group-hover:scale-110 transition-transform">98</span>
+                            <span className="text-xs md:text-sm text-gray-500 mt-2 font-medium uppercase tracking-wide">Acre Campus</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -618,19 +651,19 @@ export default function LoginPage() {
             {/* Mobile Bottom Navigation Bar - Only visible on mobile */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-gray-100 z-50 flex pb-1">
                 <button
-                    onClick={() => setShowPrincipalMessage(true)}
-                    className="flex-1 py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-50 text-gray-600 hover:text-primary-600"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-quote w-5 h-5"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /></svg>
-                    <span className="text-xs font-medium">Principal's Message</span>
-                </button>
-                <div className="w-px bg-gray-200 my-2"></div>
-                <button
                     onClick={() => setShowDirectorMessage(true)}
                     className="flex-1 py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-50 text-gray-600 hover:text-primary-600"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-quote w-5 h-5 rotate-180"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /></svg>
                     <span className="text-xs font-medium">Director's Message</span>
+                </button>
+                <div className="w-px bg-gray-200 my-2"></div>
+                <button
+                    onClick={() => setShowPrincipalMessage(true)}
+                    className="flex-1 py-3 flex flex-col items-center justify-center gap-1 active:bg-gray-50 text-gray-600 hover:text-primary-600"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-quote w-5 h-5"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 0v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /></svg>
+                    <span className="text-xs font-medium">Principal's Message</span>
                 </button>
             </div>
         </div>

@@ -48,14 +48,7 @@ export default function InstallPrompt() {
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        // Force show on mobile for testing (remove this after debugging)
-        if (mobile && !standalone) {
-            const dismissed = localStorage.getItem('install-dismissed');
-            if (!dismissed) {
-                console.log('InstallPrompt: Force showing on mobile');
-                setTimeout(() => setShowPrompt(true), 1000);
-            }
-        }
+        window.addEventListener('beforeinstallprompt', handler);
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handler);
