@@ -121,9 +121,13 @@ export default function RoleSelectionModal({
                 profileData.branch = formData.branch || '';
                 profileData.section = formData.section || '';
                 profileData.year = formData.year || 1;
+                // Set default password to Registration Number as requested
+                profileData.password = formData.registrationNumber || '';
             } else {
                 profileData.employeeId = formData.employeeId || '';
                 profileData.department = formData.department || '';
+                // Set default password to Employee ID as requested
+                profileData.password = formData.employeeId || '';
             }
 
             await updateUserProfile(profileData);
@@ -216,27 +220,62 @@ export default function RoleSelectionModal({
                                         type="text"
                                         required
                                         value={formData.registrationNumber}
-                                        onChange={(e) => {
-                                            const newRegNo = e.target.value.toUpperCase();
+                                        onChange={async (e) => {
+                                            const newRegNo = e.target.value.toUpperCase().trim();
                                             const { data: info, warning, entryType, calculatedYear } = detectBranchInfo(newRegNo);
 
                                             setBranchWarning(warning || '');
                                             setEntryType(entryType);
 
-                                            // Auto-fill Name from Registry
-                                            const foundName = (studentData as Record<string, string>)[newRegNo];
+                                            let foundName = (studentData as Record<string, string>)[newRegNo];
 
-                                            setFormData({
-                                                ...formData,
+                                            // Additional Lookup in Firestore for admin-registered students
+                                            if (newRegNo.length >= 8) {
+                                                try {
+                                                    const usersRef = collection(db, 'users');
+                                                    const q = query(usersRef, where('registrationNumber', '==', newRegNo), where('role', '==', 'student'));
+                                                    const snapshot = await getDocs(q);
+                                                    if (!snapshot.empty) {
+                                                        const dbData = snapshot.docs[0].data();
+                                                        foundName = dbData.name || foundName;
+
+                                                        // Auto-fill other fields if found in DB
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            name: dbData.name || prev.name,
+                                                            department: dbData.department || prev.department,
+                                                            branch: dbData.branch || dbData.department || prev.branch,
+                                                            year: dbData.year || prev.year,
+                                                            section: dbData.section || prev.section,
+                                                        }));
+                                                    }
+                                                } catch (err) {
+                                                    console.error("DB Lookup failed:", err);
+                                                }
+                                            }
+
+                                            setFormData(prev => ({
+                                                ...prev,
                                                 registrationNumber: newRegNo,
-                                                name: foundName || formData.name, // Only overwrite if found
-                                                branch: info?.branch || formData.branch,
-                                                department: info?.branch || formData.department,
-                                                year: calculatedYear || formData.year
-                                            });
+                                                name: foundName || prev.name,
+                                                branch: info?.branch || prev.branch,
+                                                department: info?.branch || prev.department,
+                                                year: calculatedYear || prev.year
+                                            }));
                                         }}
                                         className="input-field"
+                                        placeholder="Enter Registration Number"
                                     />
+                                    {formData.name && formData.registrationNumber.length >= 8 && (
+                                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                                                Student Found: {formData.name}
+                                            </p>
+                                            <p className="text-xs text-blue-600 dark:text-blue-400">
+                                                ID: {formData.registrationNumber} | Branch: {formData.branch || formData.department}
+                                            </p>
+                                        </div>
+                                    )}
                                     {branchWarning && (
                                         <p className="text-red-500 text-xs mt-1">{branchWarning}</p>
                                     )}

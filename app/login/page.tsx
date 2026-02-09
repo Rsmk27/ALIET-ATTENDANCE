@@ -49,20 +49,20 @@ export default function LoginPage() {
 
             setLookingUp(true);
             try {
-                // Search in all branch collections
-                const branches = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
+                // First, try to find in users collection (most reliable)
+                const usersRef = collection(db, 'users');
+                const userQuery = query(usersRef,
+                    where('registrationNumber', '==', regNo),
+                    where('role', '==', 'student')
+                );
+                const userSnapshot = await getDocs(userQuery);
 
-                for (const branch of branches) {
-                    const studentRef = collection(db, `admin/students/${branch}`);
-                    const q = query(studentRef, where('registrationNumber', '==', regNo));
-                    const snapshot = await getDocs(q);
-
-                    if (!snapshot.empty) {
-                        const studentData = snapshot.docs[0].data();
-                        setStudentName(studentData.name || '');
-                        setLookingUp(false);
-                        return;
-                    }
+                if (!userSnapshot.empty) {
+                    const userData = userSnapshot.docs[0].data();
+                    setStudentName(userData.name || '');
+                    setError('');
+                    setLookingUp(false);
+                    return;
                 }
 
                 // Fallback: Check local students.json
@@ -101,7 +101,7 @@ export default function LoginPage() {
 
         try {
             // For student login, we'll use registration number as email format
-            const email = `${studentForm.registrationNumber}@aliet.edu`;
+            const email = `${studentForm.registrationNumber}@aliet.ac.in`.toLowerCase();
             await signIn(email, studentForm.password);
 
             // Log activity
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 // To be safe, let's just create the account with the password they provided.
 
                 try {
-                    const email = `${regNo}@aliet.edu`;
+                    const email = `${regNo}@aliet.ac.in`.toLowerCase();
                     const password = studentForm.password;
 
                     // Branch info
