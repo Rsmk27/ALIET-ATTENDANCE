@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import studentData from '@/data/students.json';
+import facultyData from '@/data/faculty.json';
 import { detectBranchInfo, detectFacultyInfo } from '@/utils/branchDetector';
 
 type LoginMode = 'student' | 'institutional';
@@ -123,16 +124,28 @@ export default function LoginPage() {
                     const userData = snapshot.docs[0].data();
                     setFacultyName(userData.name || '');
                     setFacultyDept(userData.department || '');
-                } else if (structuralInfo) {
-                    setFacultyName('');
-                    setFacultyDept(structuralInfo.branch);
                 } else {
-                    setFacultyName('');
-                    setFacultyDept('');
+                    // Fallback 1: Local faculty.json
+                    const localName = (facultyData as any)[empId];
+                    if (localName) {
+                        setFacultyName(localName);
+                        if (structuralInfo) setFacultyDept(structuralInfo.branch);
+                    } else if (structuralInfo) {
+                        setFacultyName('');
+                        setFacultyDept(structuralInfo.branch);
+                    } else {
+                        setFacultyName('');
+                        setFacultyDept('');
+                    }
                 }
             } catch (err) {
                 console.error('Error looking up faculty:', err);
-                if (structuralInfo) {
+                // Fallback 2: Local faculty.json on error (permission denied)
+                const localName = (facultyData as any)[empId];
+                if (localName) {
+                    setFacultyName(localName);
+                    if (structuralInfo) setFacultyDept(structuralInfo.branch);
+                } else if (structuralInfo) {
                     setFacultyDept(structuralInfo.branch);
                 } else {
                     setFacultyName('');

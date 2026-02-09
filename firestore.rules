@@ -41,7 +41,8 @@ service cloud.firestore {
     match /users/{userId} {
       // Users can read their own profile
       // Staff and above can read all profiles
-      allow read: if isOwner(userId) || isStaffOrAbove();
+      // Unauthenticated users can read profiles for name/dept lookup during login
+      allow read: if isOwner(userId) || isStaffOrAbove() || (request.auth == null && resource.data.role in ['student', 'faculty', 'hod']);
       
       // Users can create their own profile during registration
       allow create: if isOwner(userId);
