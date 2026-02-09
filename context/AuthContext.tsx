@@ -146,6 +146,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
 
         await setDoc(doc(db, 'users', user.uid), userProfile);
+
+        // Store in hierarchical structure: admin/students/{branch}/{year}/{section}/{uid}
+        if (userData.role === 'student' && userData.branch && userData.year && userData.section) {
+            try {
+                const deepPathRef = doc(db, 'admin', 'students', userData.branch, String(userData.year), userData.section, user.uid);
+                await setDoc(deepPathRef, userProfile);
+            } catch (error) {
+                console.error("Error saving to hierarchical path:", error);
+            }
+        }
+
         setCurrentUser(userProfile);
     };
 
@@ -216,7 +227,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Use the enforced role logic
         const targetRole = updatedData.role || currentUser?.role;
 
-        if (targetRole === 'faculty') {
+        // 2. Store Faculty/HOD Data in Branch Collection
+        if (targetRole === 'faculty' || targetRole === 'hod') {
             const branchName = data.department || currentUser?.department;
 
             if (branchName) {
@@ -240,6 +252,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     department: branchName,
                     joinedAt: serverTimestamp(),
                 }, { merge: true });
+            }
+        } else if (targetRole === 'student') {
+            // Student Hierarchy: admin/students/{Branch}/{Year}/{Section}/{UID}
+            const br = updatedData.branch || currentUser?.branch;
+            const yr = updatedData.year || currentUser?.year;
+            const sec = updatedData.section || currentUser?.section;
+
+            if (br && yr && sec) {
+                try {
+                    const deepRef = doc(db, 'admin', 'students', br, String(yr), sec, firebaseUser.uid);
+                    await setDoc(deepRef, updatedData, { merge: true });
+                } catch (error) {
+                    console.error("Error syncing student hierarchy:", error);
+                }
             }
         }
 

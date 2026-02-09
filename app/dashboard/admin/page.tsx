@@ -52,30 +52,43 @@ function AdminDashboard() {
         const unsubscribes: Unsubscribe[] = [];
 
         // 1. Listen for Students Data (Per Branch)
-        BRANCHES.forEach(branch => {
-            const q = collection(db, `admin/students/${branch}`);
-            const unsub = onSnapshot(q, (snapshot) => {
-                const branchStudents = snapshot.docs.map(doc => ({
-                    uid: doc.id,
-                    ...doc.data()
-                })) as Student[];
+        // 1. Listen for ALL Students from Users Collection
+        const studentsQuery = query(
+            collection(db, 'users'),
+            where('role', '==', 'student')
+        );
 
-                setStudentsMap(prev => ({
-                    ...prev,
-                    [branch]: branchStudents
-                }));
-                setLoading(false); // Enable UI as soon as data starts flowing
-            }, (error) => {
-                console.error(`Error listening to ${branch} students:`, error);
-                setLoading(false);
+        const unsubStudents = onSnapshot(studentsQuery, (snapshot) => {
+            const allStudents = snapshot.docs.map(doc => ({
+                uid: doc.id,
+                ...doc.data()
+            })) as Student[];
+
+            // Group by branch
+            const grouped = allStudents.reduce((acc, student) => {
+                const branch = student.branch || 'Unknown';
+                if (!acc[branch]) acc[branch] = [];
+                acc[branch].push(student);
+                return acc;
+            }, {} as Record<string, Student[]>);
+
+            // Initialize all branches to ensure UI consistency
+            BRANCHES.forEach(b => {
+                if (!grouped[b]) grouped[b] = [];
             });
-            unsubscribes.push(unsub);
-        });
 
-        // 2. Listen for Faculty Data
+            setStudentsMap(grouped);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error listening to students:", error);
+            setLoading(false);
+        });
+        unsubscribes.push(unsubStudents);
+
+        // 2. Listen for Faculty and HOD Data
         const facultyQuery = query(
             collection(db, 'users'),
-            where('role', '==', 'faculty')
+            where('role', 'in', ['faculty', 'hod'])
         );
         const unsubFaculty = onSnapshot(facultyQuery, (snapshot) => {
             const facultyData = snapshot.docs.map(doc => ({
