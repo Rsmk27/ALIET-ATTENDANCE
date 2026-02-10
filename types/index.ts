@@ -20,6 +20,7 @@ export interface User {
     year?: number;
     profilePicture?: string;
     rating?: number;
+    isApproved?: boolean; // For faculty/HOD approval
     createdAt: Timestamp;
     updatedAt?: Timestamp;
 }

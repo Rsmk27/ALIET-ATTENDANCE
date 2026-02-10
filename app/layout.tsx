@@ -4,7 +4,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import InstallPrompt from "@/components/ui/InstallPrompt";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { ThemeProvider } from "@/context/ThemeContext";
-import ThemeToggleFloating from "@/components/ui/ThemeToggleFloating";
 import NavigationDock from "@/components/ui/NavigationDock";
 import LoadingBar from "@/components/ui/LoadingBar";
 import { Suspense } from "react";
@@ -49,7 +48,6 @@ export default function RootLayout({
                         </Suspense>
                         {children}
                         <InstallPrompt />
-                        <ThemeToggleFloating />
                         <NavigationDock />
                     </ThemeProvider>
                 </AuthProvider>

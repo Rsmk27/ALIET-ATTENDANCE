@@ -123,11 +123,13 @@ export default function RoleSelectionModal({
                 profileData.year = formData.year || 1;
                 // Set default password to Registration Number as requested
                 profileData.password = formData.registrationNumber || '';
+                profileData.isApproved = true; // Students are auto-approved
             } else {
                 profileData.employeeId = formData.employeeId || '';
                 profileData.department = formData.department || '';
                 // Set default password to Employee ID as requested
                 profileData.password = formData.employeeId || '';
+                profileData.isApproved = false; // Faculty/HOD need admin approval
             }
 
             await updateUserProfile(profileData);
@@ -159,15 +161,7 @@ export default function RoleSelectionModal({
                         </p>
 
                         <div className="space-y-3">
-                            <button
-                                onClick={() => handleRoleSelect('student')}
-                                className="w-full p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-left"
-                            >
-                                <div className="font-semibold text-gray-900 dark:text-white">Student</div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    View attendance, marks, and fees
-                                </div>
-                            </button>
+
 
                             <button
                                 onClick={() => handleRoleSelect('faculty')}

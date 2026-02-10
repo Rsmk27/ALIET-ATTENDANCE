@@ -545,11 +545,17 @@ export default function LoginPage() {
                             >
                                 {loading ? 'Signing in...' : 'Sign In'}
                             </button>
+
+                            <div className="text-center">
+                                <a href="/register" className="text-sm text-primary-600 hover:text-primary-700">
+                                    Don't have an account? Register
+                                </a>
+                            </div>
                         </form>
                     )}
 
-                    {/* Google Sign In - Only for Students */}
-                    {mode === 'student' && (
+                    {/* Google Sign In - Only for Faculty */}
+                    {mode === 'institutional' && (
                         <>
                             {/* Divider */}
                             <div className="relative my-6">

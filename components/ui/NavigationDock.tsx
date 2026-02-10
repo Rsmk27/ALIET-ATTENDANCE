@@ -24,15 +24,12 @@ export default function NavigationDock() {
 
     const role = currentUser.role;
 
+    // Do not show dock for admin as per request
+    if (role === 'admin') return null;
+
     // Define navigation items based on role
     const getNavItems = () => {
-        if (role === 'admin') {
-            return [
-                { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard/admin' },
-                { icon: Shield, label: 'Roles', path: '/dashboard/admin/roles' },
-                { icon: Settings, label: 'Settings', path: '/dashboard/admin/settings' },
-            ];
-        }
+
 
         if (role === 'faculty' || role === 'hod') {
             return [

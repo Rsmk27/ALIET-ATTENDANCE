@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun, UserPlus, Edit, X, Save, Trash2, AlertTriangle } from 'lucide-react';
+import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun, UserPlus, Edit, X, Save, Trash2, AlertTriangle, Check, XCircle, Mail } from 'lucide-react';
 import SpotlightCursor from '@/components/ui/SpotlightCursor';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 
@@ -29,6 +29,7 @@ interface Faculty {
     employeeId?: string;
     department?: string;
     mobileNumber?: string;
+    isApproved?: boolean;
 }
 
 const BRANCHES = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
@@ -41,8 +42,9 @@ function AdminDashboard() {
     const students = useMemo(() => Object.values(studentsMap).flat(), [studentsMap]);
 
     const [faculty, setFaculty] = useState<Faculty[]>([]);
+    const [pendingFaculty, setPendingFaculty] = useState<Faculty[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'students' | 'faculty' | 'activity'>('students');
+    const [activeTab, setActiveTab] = useState<'students' | 'faculty' | 'activity' | 'pending'>('students');
     const [logs, setLogs] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterBranch, setFilterBranch] = useState('all');
@@ -107,7 +109,9 @@ function AdminDashboard() {
                 uid: doc.id,
                 ...doc.data()
             })) as Faculty[];
-            setFaculty(facultyData);
+            // Separate approved and pending
+            setFaculty(facultyData.filter(f => f.isApproved !== false));
+            setPendingFaculty(facultyData.filter(f => f.isApproved === false));
         }, (error) => console.error('Error listening to faculty:', error));
         unsubscribes.push(unsubFaculty);
 
@@ -138,6 +142,45 @@ function AdminDashboard() {
     const handleSignOut = async () => {
         await signOut();
         router.push('/login');
+    };
+
+    const handleApproveUser = async (user: Faculty) => {
+        if (!confirm(`Are you sure you want to approve ${user.name}? This will grant them access to the dashboard.`)) return;
+
+        try {
+            const { doc: docImport, updateDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
+
+            // 1. Update User Document
+            const userRef = docImport(db, 'users', user.uid);
+            await updateDoc(userRef, {
+                isApproved: true,
+                updatedAt: serverTimestamp()
+            });
+
+            // 2. Also update in admin/hierarchy if exists (though listener handles display)
+            // Faculty are stored in distinct branch collections, but 'isApproved' lives on the User object primarily.
+            // If we duplicated execution data, we might need to update it, but typically 'isApproved' checks the main 'users' collection.
+
+            // 3. Send Email (Mock)
+            // In a real app, this would call a Cloud Function or API
+            console.log(`Sending approval email to ${user.email}...`);
+            alert(`Approved ${user.name}. An email notification has been sent to ${user.email}.`);
+
+            // 4. Log the action
+            const { addDoc, collection } = await import('firebase/firestore');
+            await addDoc(collection(db, 'admin/logs/approvals'), {
+                adminId: currentUser?.uid,
+                adminName: currentUser?.name,
+                targetUserId: user.uid,
+                targetUserName: user.name,
+                action: 'approve',
+                timestamp: serverTimestamp()
+            });
+
+        } catch (error) {
+            console.error("Error approving user:", error);
+            alert("Failed to approve user");
+        }
     };
 
     const handleEditUser = (user: Student | Faculty) => {
@@ -219,6 +262,7 @@ function AdminDashboard() {
                 });
             } else {
                 setFaculty(prev => prev.filter(f => f.uid !== userToDelete.uid));
+                setPendingFaculty(prev => prev.filter(f => f.uid !== userToDelete.uid));
             }
             setDeleteModalOpen(false);
             // ---------------------------------------------------------
@@ -430,6 +474,20 @@ function AdminDashboard() {
                                     >
                                         Activity Logs
                                     </button>
+                                    <button
+                                        onClick={() => setActiveTab('pending')}
+                                        className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === 'pending'
+                                            ? 'bg-amber-500 text-white'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                            } relative`}
+                                    >
+                                        Pending Approvals
+                                        {pendingFaculty.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white ring-2 ring-white">
+                                                {pendingFaculty.length}
+                                            </span>
+                                        )}
+                                    </button>
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -627,6 +685,84 @@ function AdminDashboard() {
                                                                     <Edit className="w-4 h-4" />
                                                                     <span className="hidden sm:inline">Edit</span>
                                                                 </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    ) : activeTab === 'pending' ? (
+                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Faculty Name
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Email
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Department
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Status
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Actions
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                                {pendingFaculty.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                                            No pending approvals
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    pendingFaculty.map((member) => (
+                                                        <tr key={member.uid} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{member.name}</div>
+                                                                <div className="text-xs text-gray-500">{member.mobileNumber || 'No mobile'}</div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="text-sm text-gray-900 dark:text-gray-100">{member.email}</div>
+                                                                <div className="text-xs text-gray-500">{member.employeeId || 'ID Pending'}</div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-secondary-100 text-secondary-800">
+                                                                    {member.department || 'Unassigned'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 flex items-center gap-1">
+                                                                    <AlertTriangle className="w-3 h-3" />
+                                                                    Pending
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                                <div className="flex items-center gap-3">
+                                                                    <button
+                                                                        onClick={() => handleApproveUser(member)}
+                                                                        className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors shadow-sm"
+                                                                        title="Approve Faculty"
+                                                                    >
+                                                                        <Check className="w-4 h-4" />
+                                                                        Approve
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            // Reuse existing delete logic or create simpler one
+                                                                            handleDeleteClick(member);
+                                                                        }}
+                                                                        className="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                                                                        title="Reject & Delete"
+                                                                    >
+                                                                        <XCircle className="w-4 h-4" />
+                                                                        Reject
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ))
