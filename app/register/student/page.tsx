@@ -172,7 +172,7 @@ export default function StudentRegisterPage() {
                                                 year: calculatedYear || formData.year
                                             });
                                         }}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                         placeholder="e.g., 24HP5A0216"
                                     />
                                     {branchWarning && (
@@ -189,7 +189,7 @@ export default function StudentRegisterPage() {
                                         required
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                         placeholder="Enter your full name"
                                     />
                                 </div>
@@ -230,7 +230,7 @@ export default function StudentRegisterPage() {
                                         required
                                         value={formData.department}
                                         onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="CSE">Computer Science (CSE)</option>
@@ -251,7 +251,7 @@ export default function StudentRegisterPage() {
                                         required
                                         value={formData.branch}
                                         onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                         placeholder="e.g., CSE"
                                     />
                                 </div>
@@ -265,7 +265,7 @@ export default function StudentRegisterPage() {
                                         required
                                         value={formData.section}
                                         onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                         placeholder="e.g., A"
                                     />
                                 </div>
@@ -278,7 +278,7 @@ export default function StudentRegisterPage() {
                                         required
                                         value={formData.year}
                                         onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                        className="input-field"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                     >
                                         <option value={1}>1st Year</option>
                                         <option value={2}>2nd Year</option>
@@ -296,7 +296,7 @@ export default function StudentRegisterPage() {
                                         readOnly
                                         disabled
                                         value={entryType || ''}
-                                        className="input-field bg-gray-50 text-gray-500 cursor-not-allowed"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-gray-50 text-gray-500 cursor-not-allowed"
                                         placeholder="Auto-detected (e.g., Regular)"
                                     />
                                 </div>

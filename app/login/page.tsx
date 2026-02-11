@@ -483,7 +483,7 @@ export default function LoginPage() {
                         }} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Faculty ID
+                                    Staff ID
                                 </label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -495,7 +495,7 @@ export default function LoginPage() {
                                             setInstitutionalForm({ ...institutionalForm, email: e.target.value })
                                         }
                                         className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${facultyName ? 'border-green-300 bg-green-50' : 'border-gray-300'}`}
-                                        placeholder="Enter your Faculty ID"
+                                        placeholder="Enter your Staff ID"
                                     />
                                     {lookingUpFaculty && (
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
