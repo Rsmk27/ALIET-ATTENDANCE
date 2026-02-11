@@ -952,11 +952,11 @@ function AdminDashboard() {
                                 )}
 
                                 {/* Faculty-specific Fields */}
-                                {'employeeId' in editingUser && (
+                                {!('registrationNumber' in editingUser) && 'employeeId' in editingUser && (
                                     <>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Employee ID
+                                                Staff ID
                                             </label>
                                             <input
                                                 type="text"
