@@ -152,6 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             branch: userData.branch || '',
             section: userData.section || '',
             year: userData.year || 0,
+            isApproved: userData.isApproved,
             createdAt: serverTimestamp() as any,
         };
 
