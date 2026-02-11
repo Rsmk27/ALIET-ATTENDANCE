@@ -20,6 +20,7 @@ interface Student {
     year?: number;
     section?: string;
     mobileNumber?: string;
+    password?: string;
 }
 
 interface Faculty {
@@ -31,6 +32,7 @@ interface Faculty {
     mobileNumber?: string;
     isApproved?: boolean;
     role?: string;
+    password?: string;
 }
 
 const BRANCHES = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
@@ -210,6 +212,33 @@ function AdminDashboard() {
         setEditLoading(true);
         try {
             const { doc: docImport, updateDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
+
+            // Handle Password Update if changed
+            if (editFormData.password && editFormData.password !== editingUser.password) {
+                try {
+                    const { getAuth } = await import('firebase/auth');
+                    const auth = getAuth();
+                    const token = await auth.currentUser?.getIdToken();
+
+                    const response = await fetch('/api/admin/update-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            uid: editingUser.uid,
+                            email: editingUser.email,
+                            newPassword: editFormData.password,
+                            adminToken: token
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.warn('Failed to update auth password via API, user may need to reset it manually.');
+                        // We continue to update Firestore so simpler setups working via local checks still function
+                    }
+                } catch (e) {
+                    console.error("Error calling password update API", e);
+                }
+            }
 
             // Update main users collection
             const userRef = docImport(db, 'users', editingUser.uid);
@@ -899,6 +928,24 @@ function AdminDashboard() {
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         placeholder="10-digit mobile number"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Password (Login)
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={editFormData.password || ''}
+                                            onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-mono text-sm"
+                                            placeholder="Enter new password to update"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Updating this will change the user's login password.
+                                        </p>
+                                    </div>
                                 </div>
 
                                 {/* Student-specific Fields */}

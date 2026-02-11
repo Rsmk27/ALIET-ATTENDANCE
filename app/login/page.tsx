@@ -258,7 +258,8 @@ export default function LoginPage() {
                 } catch (regErr: any) {
                     console.error("Auto-registration failed", regErr);
                     if (regErr.code === 'auth/email-already-in-use') {
-                        setError("Account already exists. Please check your password.");
+                        // This means the user exists, so the initial login failure was due to a wrong password.
+                        setError("Incorrect Password. Please try again.");
                     } else {
                         setError(regErr.message || 'Login failed');
                     }
