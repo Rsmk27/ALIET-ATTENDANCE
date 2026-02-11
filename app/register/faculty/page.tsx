@@ -119,7 +119,7 @@ export default function FacultyRegisterPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Employee ID *
+                                        Staff ID *
                                     </label>
                                     <div className="relative">
                                         <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -128,7 +128,7 @@ export default function FacultyRegisterPage() {
                                             required
                                             value={formData.employeeId}
                                             onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                             placeholder="Staff ID"
                                         />
                                     </div>
@@ -145,7 +145,7 @@ export default function FacultyRegisterPage() {
                                             required
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                             placeholder="official@aliet.ac.in"
                                         />
                                     </div>
@@ -164,7 +164,7 @@ export default function FacultyRegisterPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, mobileNumber: e.target.value })
                                             }
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                             placeholder="10-digit mobile number"
                                         />
                                     </div>

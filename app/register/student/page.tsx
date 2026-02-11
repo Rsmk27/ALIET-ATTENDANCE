@@ -59,24 +59,21 @@ export default function StudentRegisterPage() {
             // Use registration number as default password
             const password = formData.registrationNumber;
 
-            // Check if student exists in database
-            let studentExists = false;
-            let existingStudentData = null;
-            const branches = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
+            // Check if student exists in database (check main users collection)
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('registrationNumber', '==', formData.registrationNumber));
+            const snapshot = await getDocs(q);
 
-            for (const branch of branches) {
-                const studentRef = collection(db, `admin/students/${branch}`);
-                const q = query(studentRef, where('registrationNumber', '==', formData.registrationNumber));
-                const snapshot = await getDocs(q);
-
-                if (!snapshot.empty) {
-                    studentExists = true;
-                    existingStudentData = snapshot.docs[0].data();
-                    break;
-                }
+            if (!snapshot.empty) {
+                setError('Student with this Registration Number already exists');
+                setLoading(false);
+                return;
             }
 
             // Create Firebase Auth account with registration number as password
+            // The AuthContext signUp function handles saving to:
+            // 1. users/{uid}
+            // 2. admin/students/{branch}/{year}/{section}/{uid}
             await signUp(email, password, {
                 role: 'student',
                 name: formData.name,
@@ -84,28 +81,9 @@ export default function StudentRegisterPage() {
                 mobileNumber: formData.mobileNumber,
                 department: formData.department,
                 branch: formData.branch,
-                section: formData.section,
+                section: formData.section.toUpperCase(), // Ensure uppercase
                 year: formData.year,
             });
-
-            // Create or update student profile in admin/students/{branch}
-            const studentProfileData = {
-                name: formData.name,
-                email: email,
-                registrationNumber: formData.registrationNumber,
-                branch: formData.branch,
-                department: formData.department,
-                section: formData.section,
-                year: formData.year,
-                mobileNumber: formData.mobileNumber,
-                role: 'student',
-                createdAt: existingStudentData?.createdAt || new Date(),
-                updatedAt: new Date()
-            };
-
-            // Store in the respective branch collection
-            const branchStudentRef = doc(collection(db, `admin/students/${formData.branch}`), formData.registrationNumber);
-            await setDoc(branchStudentRef, studentProfileData, { merge: true });
 
             // Show success modal
             setShowSuccessModal(true);

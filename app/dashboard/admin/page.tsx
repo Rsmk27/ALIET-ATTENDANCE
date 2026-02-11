@@ -30,6 +30,7 @@ interface Faculty {
     department?: string;
     mobileNumber?: string;
     isApproved?: boolean;
+    role?: string;
 }
 
 const BRANCHES = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
@@ -157,9 +158,23 @@ function AdminDashboard() {
                 updatedAt: serverTimestamp()
             });
 
-            // 2. Also update in admin/hierarchy if exists (though listener handles display)
-            // Faculty are stored in distinct branch collections, but 'isApproved' lives on the User object primarily.
-            // If we duplicated execution data, we might need to update it, but typically 'isApproved' checks the main 'users' collection.
+            // 2. Also update in admin/hierarchy
+            // Ensure approved faculty are present in their branch collection
+            if (user.role === 'faculty' || user.role === 'hod') {
+                const facultyUser = user as Faculty;
+                if (facultyUser.department) {
+                    const branchRef = docImport(db, 'admin', 'faculty', 'branch', facultyUser.department);
+                    // Ensure branch doc exists
+                    await setDoc(branchRef, { name: facultyUser.department }, { merge: true });
+
+                    const memberRef = docImport(branchRef, 'faculty_members', user.uid);
+                    await setDoc(memberRef, {
+                        ...facultyUser,
+                        isApproved: true,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                }
+            }
 
             // 3. Send Email (Mock)
             // In a real app, this would call a Cloud Function or API
@@ -446,7 +461,7 @@ function AdminDashboard() {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
                         <div className="border-b border-gray-200 dark:border-gray-700">
                             <div className="flex flex-col lg:flex-row items-center justify-between px-6 py-4 gap-4">
-                                <div className="flex gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0">
+                                <div className="flex gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
                                     <button
                                         onClick={() => setActiveTab('students')}
                                         className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === 'students'
