@@ -229,7 +229,14 @@ export default function StudentRegisterPage() {
                                     <select
                                         required
                                         value={formData.department}
-                                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                        onChange={(e) => {
+                                            const selectedDept = e.target.value;
+                                            setFormData({
+                                                ...formData,
+                                                department: selectedDept,
+                                                branch: selectedDept
+                                            });
+                                        }}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                     >
                                         <option value="">Select Department</option>
@@ -250,9 +257,17 @@ export default function StudentRegisterPage() {
                                         type="text"
                                         required
                                         value={formData.branch}
-                                        onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value.toUpperCase();
+                                            const validDepts = ["CSE", "ECE", "EEE", "MECH", "CIVIL", "IT"];
+                                            if (validDepts.includes(val)) {
+                                                setFormData({ ...formData, branch: e.target.value, department: val });
+                                            } else {
+                                                setFormData({ ...formData, branch: e.target.value });
+                                            }
+                                        }}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
-                                        placeholder="e.g., CSE"
+                                        placeholder="e.g., EEE"
                                     />
                                 </div>
 
