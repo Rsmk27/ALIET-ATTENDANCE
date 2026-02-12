@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun, UserPlus, Edit, X, Save, Trash2, AlertTriangle, Check, XCircle, Mail } from 'lucide-react';
+import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun, UserPlus, Edit, X, Save, Trash2, AlertTriangle, Check, XCircle, Mail, LayoutDashboard, BarChart3 } from 'lucide-react';
 import SpotlightCursor from '@/components/ui/SpotlightCursor';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 
@@ -417,12 +417,26 @@ function AdminDashboard() {
                     }}
                 />
                 {/* Header */}
-                <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 sticky top-0 z-10">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-col sm:flex-row justify-between items-center py-4 gap-4 sm:gap-0">
-                            <div className="text-center sm:text-left">
-                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Welcome, {currentUser?.name}</p>
+                        <div className="flex items-center justify-between py-4">
+                            <div className="flex items-center gap-6">
+                                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+                                <nav className="hidden md:flex items-center gap-2">
+                                    <button
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 dark:bg-primary-900/20 dark:text-primary-400 rounded-lg"
+                                    >
+                                        <LayoutDashboard className="w-4 h-4" />
+                                        Dashboard
+                                    </button>
+                                    <button
+                                        onClick={() => router.push('/dashboard/admin/analytics')}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
+                                        <BarChart3 className="w-4 h-4" />
+                                        Analytics
+                                    </button>
+                                </nav>
                             </div>
                             <div className="flex items-center gap-3">
                                 <button
@@ -434,7 +448,7 @@ function AdminDashboard() {
                                 </button>
                                 <button
                                     onClick={toggleTheme}
-                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                     title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                 >
                                     {darkMode ? (
@@ -451,10 +465,10 @@ function AdminDashboard() {
                                 </button>
                                 <button
                                     onClick={handleSignOut}
-                                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm"
                                 >
                                     <LogOut className="w-5 h-5" />
-                                    <span>Sign Out</span>
+                                    <span className="hidden sm:inline">Logout</span>
                                 </button>
                             </div>
                         </div>
