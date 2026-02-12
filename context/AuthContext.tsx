@@ -152,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             branch: userData.branch || '',
             section: userData.section || '',
             year: userData.year || 0,
-            isApproved: userData.isApproved,
+            isApproved: userData.isApproved ?? false,
             createdAt: serverTimestamp() as any,
         };
 
@@ -161,8 +161,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Store in hierarchical structure: admin/students/{branch}/{year}/{section}/{uid}
         if (userData.role === 'student' && userData.branch && userData.year && userData.section) {
             try {
+                // Ensure Branch Document Exists (admin/students/BRANCH)
+                // Note: 'students' is a doc in 'admin' col. 'BRANCH' is a subcol of 'students' doc.
+                // We want to write to doc: admin/students/BRANCH/year
+                // Wait, if hierarchy is: db -> admin(col) -> students(doc) -> EEE(col) -> 1(doc) -> A(col) -> uid(doc)
+
+                // To make 'EEE' collection visible inside 'students' doc, we just need to write documents inside it.
+                // But if we want to store metadata about the year (doc '1'), we should write to it.
+
+                const yearDocRef = doc(db, 'admin', 'students', userData.branch, String(userData.year));
+                await setDoc(yearDocRef, {
+                    year: userData.year,
+                    active: true
+                }, { merge: true });
+
                 const deepPathRef = doc(db, 'admin', 'students', userData.branch, String(userData.year), userData.section, user.uid);
                 await setDoc(deepPathRef, userProfile);
+                console.log("Successfully wrote student to hierarchy:", deepPathRef.path);
             } catch (error) {
                 console.error("Error saving to hierarchical path:", error);
             }

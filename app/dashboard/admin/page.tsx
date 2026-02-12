@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { collection, query, where, orderBy, limit, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -47,8 +47,7 @@ function AdminDashboard() {
     const [faculty, setFaculty] = useState<Faculty[]>([]);
     const [pendingFaculty, setPendingFaculty] = useState<Faculty[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'students' | 'faculty' | 'activity' | 'pending'>('students');
-    const [logs, setLogs] = useState<any[]>([]);
+    const [activeTab, setActiveTab] = useState<'students' | 'faculty' | 'pending'>('students');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterBranch, setFilterBranch] = useState('all');
     const [filterYear, setFilterYear] = useState('all');
@@ -118,24 +117,7 @@ function AdminDashboard() {
         }, (error) => console.error('Error listening to faculty:', error));
         unsubscribes.push(unsubFaculty);
 
-        // 3. Listen for Activity Logs
-        const logsQuery = query(
-            collection(db, 'admin/logs/logins'),
-            orderBy('timestamp', 'desc'),
-            limit(50)
-        );
-        const unsubLogs = onSnapshot(logsQuery, (snapshot) => {
-            const logsData = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp)
-                };
-            });
-            setLogs(logsData);
-        }, (error) => console.error('Error listening to logs:', error));
-        unsubscribes.push(unsubLogs);
+
 
         return () => {
             unsubscribes.forEach(unsub => unsub());
@@ -249,22 +231,52 @@ function AdminDashboard() {
 
             // Update hierarchical structure based on role
             const isStudent = 'registrationNumber' in editingUser;
+            const { deleteDoc } = await import('firebase/firestore');
 
             if (isStudent) {
-                // Update student in admin hierarchy
-                const student = editFormData as Student;
-                if (student.branch && student.year && student.section) {
-                    const hierarchyRef = docImport(db, 'admin', 'students', student.branch, String(student.year), student.section, editingUser.uid);
+                const oldStudent = editingUser as Student;
+                const newStudent = editFormData as Student;
+
+                // Check for location change
+                const locationChanged =
+                    oldStudent.branch !== newStudent.branch ||
+                    oldStudent.year !== newStudent.year ||
+                    oldStudent.section !== newStudent.section;
+
+                if (locationChanged && oldStudent.branch && oldStudent.year && oldStudent.section) {
+                    // Delete from old path
+                    const oldRef = docImport(db, 'admin', 'students', oldStudent.branch, String(oldStudent.year), oldStudent.section, editingUser.uid);
+                    await deleteDoc(oldRef);
+                }
+
+                // Update/Create in new path
+                if (newStudent.branch && newStudent.year && newStudent.section) {
+                    const hierarchyRef = docImport(db, 'admin', 'students', newStudent.branch, String(newStudent.year), newStudent.section, editingUser.uid);
                     await setDoc(hierarchyRef, {
                         ...editFormData,
                         updatedAt: serverTimestamp()
                     }, { merge: true });
                 }
             } else {
-                // Update faculty in admin hierarchy
-                const faculty = editFormData as Faculty;
-                if (faculty.department) {
-                    const branchRef = docImport(db, 'admin', 'faculty', 'branch', faculty.department);
+                const oldFaculty = editingUser as Faculty;
+                const newFaculty = editFormData as Faculty;
+
+                // Check for location change
+                const locationChanged = oldFaculty.department !== newFaculty.department;
+
+                if (locationChanged && oldFaculty.department) {
+                    // Delete from old path
+                    const oldBranchRef = docImport(db, 'admin', 'faculty', 'branch', oldFaculty.department);
+                    const oldMemberRef = docImport(oldBranchRef, 'faculty_members', editingUser.uid);
+                    await deleteDoc(oldMemberRef);
+                }
+
+                // Update/Create in new path
+                if (newFaculty.department) {
+                    const branchRef = docImport(db, 'admin', 'faculty', 'branch', newFaculty.department);
+                    // Ensure branch doc exists
+                    await setDoc(branchRef, { name: newFaculty.department }, { merge: true });
+
                     const memberRef = docImport(branchRef, 'faculty_members', editingUser.uid);
                     await setDoc(memberRef, {
                         ...editFormData,
@@ -294,6 +306,32 @@ function AdminDashboard() {
 
         setDeleteLoading(true);
         try {
+            // 1. Call ID Deletion API (Auth + Users Collection)
+            if (currentUser) {
+                try {
+                    const { getAuth } = await import('firebase/auth');
+                    const auth = getAuth();
+                    const token = await auth.currentUser?.getIdToken();
+
+                    const response = await fetch('/api/admin/delete-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            uid: userToDelete.uid,
+                            adminToken: token
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        console.error("Server-side deletion failed:", err);
+                        // We continue to client-side deletion as fallback/cleanup
+                    }
+                } catch (apiError) {
+                    console.error("Error calling delete API:", apiError);
+                }
+            }
+
             // --- OPTIMISTIC UI: Remove from local maps immediately ---
             const isStudent = 'registrationNumber' in userToDelete;
             if (isStudent) {
@@ -313,9 +351,9 @@ function AdminDashboard() {
 
             const { doc: docImport, deleteDoc } = await import('firebase/firestore');
 
-            // Delete from main users collection
+            // Delete from main users collection (Redundant if API worked, but safe)
             const userRef = docImport(db, 'users', userToDelete.uid);
-            await deleteDoc(userRef);
+            await deleteDoc(userRef).catch(e => console.log("Doc maybe already deleted by API", e));
 
             // Delete from hierarchy based on role
             if (isStudent) {
@@ -336,7 +374,7 @@ function AdminDashboard() {
             setUserToDelete(null);
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('Failed to delete user. Please try again.');
+            alert('Failed to delete user completely. Please check console.');
         } finally {
             setDeleteLoading(false);
         }
@@ -509,15 +547,7 @@ function AdminDashboard() {
                                     >
                                         Faculty ({faculty.length})
                                     </button>
-                                    <button
-                                        onClick={() => setActiveTab('activity')}
-                                        className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === 'activity'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                            }`}
-                                    >
-                                        Activity Logs
-                                    </button>
+
                                     <button
                                         onClick={() => setActiveTab('pending')}
                                         className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === 'pending'
@@ -585,7 +615,7 @@ function AdminDashboard() {
                         {/* Table Content */}
                         <div className="p-6">
                             {loading ? (
-                                <TableSkeleton rows={8} cols={activeTab === 'students' ? 7 : activeTab === 'faculty' ? 5 : 4} />
+                                <TableSkeleton rows={8} cols={activeTab === 'students' ? 7 : 5} />
                             ) : (
                                 <div className="overflow-x-auto">
                                     {activeTab === 'students' ? (
@@ -813,58 +843,7 @@ function AdminDashboard() {
                                                 )}
                                             </tbody>
                                         </table>
-                                    ) : (
-                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead className="bg-gray-50 dark:bg-gray-700">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Time
-                                                    </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        User
-                                                    </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Role
-                                                    </th>
-                                                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Details
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                                {logs.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                                                            No activity logs found
-                                                        </td>
-                                                    </tr>
-                                                ) : (
-                                                    logs.map((log) => (
-                                                        <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                {log.timestamp instanceof Date ? log.timestamp.toLocaleString() : 'Just now'}
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{log.name || 'Unknown User'}</div>
-                                                                <div className="text-xs text-gray-600 dark:text-gray-300">{log.email}</div>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${log.role === 'faculty'
-                                                                    ? 'bg-secondary-100 text-secondary-800'
-                                                                    : 'bg-primary-100 text-primary-800'
-                                                                    }`}>
-                                                                    {log.role}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                Login Success
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    )}
+                                    ) : null}
                                 </div>
                             )}
                         </div>

@@ -114,22 +114,40 @@ export default function LoginPage() {
         const lookupFaculty = async () => {
             const rawId = institutionalForm.email.trim();
             // Only lookup if it's an ID (not a full email) or a short ID
-            if (!rawId || rawId.includes('@') || rawId.length < 4) {
+            if (!rawId || rawId.length < 4) {
                 setFacultyName('');
                 setFacultyDept('');
                 return;
             }
 
             const empId = rawId.toUpperCase();
+
+            // Construct potential email
+            const emailSearch = rawId.includes('@')
+                ? rawId.toLowerCase()
+                : `${rawId.toLowerCase()}@aliet.ac.in`;
+
             const structuralInfo = detectFacultyInfo(empId);
             setLookingUpFaculty(true);
+
             try {
                 const usersRef = collection(db, 'users');
-                const q = query(usersRef,
+
+                // Strategy 1: Lookup by Employee ID
+                let q = query(usersRef,
                     where('employeeId', '==', empId),
                     where('role', 'in', ['faculty', 'hod'])
                 );
-                const snapshot = await getDocs(q);
+                let snapshot = await getDocs(q);
+
+                // Strategy 2: Lookup by Email if ID lookup failed
+                if (snapshot.empty) {
+                    q = query(usersRef,
+                        where('email', '==', emailSearch),
+                        where('role', 'in', ['faculty', 'hod'])
+                    );
+                    snapshot = await getDocs(q);
+                }
 
                 if (!snapshot.empty) {
                     const userData = snapshot.docs[0].data();
@@ -160,6 +178,7 @@ export default function LoginPage() {
                     }
                 }
             } catch (err) {
+                console.error("Faculty lookup error:", err);
                 // Fallback 2: Local faculty.json on error (permission denied)
                 try {
                     const facultyModule = await import('@/data/faculty.json');

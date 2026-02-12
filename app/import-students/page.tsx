@@ -52,6 +52,7 @@ export default function ImportStudentsPage() {
         setStatus('📊 Starting import from students.json...');
 
         try {
+            const { detectBranchInfo } = await import('@/utils/branchDetector');
             const entries = Object.entries(studentsData);
             setProgress({ current: 0, total: entries.length });
 
@@ -62,34 +63,58 @@ export default function ImportStudentsPage() {
                 const [regNo, name] = entries[i];
 
                 try {
-                    const { year, section } = parseRegistrationNumber(regNo);
+                    const info = detectBranchInfo(regNo);
+                    const year = info.calculatedYear || 1;
+                    const branch = info.data?.branch || 'EEE'; // Default to EEE if unknown, as per original file
+                    const section = 'A'; // Default to A as we don't have section in JSON
 
                     const studentData = {
                         name: name as string,
                         email: `${regNo.toLowerCase()}@aliet.ac.in`,
                         registrationNumber: regNo,
-                        branch: 'EEE',
+                        branch: branch,
                         year: year,
                         section: section,
                         role: 'student',
                         createdAt: new Date(),
-                        updatedAt: new Date()
+                        updatedAt: new Date(),
+                        isApproved: true // Auto-approve imported students
                     };
 
-                    // Store in collection: admin/students/EEE
-                    const studentRef = doc(collection(db, 'admin/students/EEE'), regNo);
+                    // 1. Ensure Year Document Exists
+                    const yearDocRef = doc(db, 'admin', 'students', branch, String(year));
+                    await setDoc(yearDocRef, { year: year, active: true }, { merge: true });
+
+                    // 2. Store in Hierarchical Path
+                    // path: admin/students/{branch}/{year}/{section}/{regNo}
+                    const studentRef = doc(db, 'admin', 'students', branch, String(year), section, regNo);
                     await setDoc(studentRef, studentData, { merge: true });
+
+                    // 3. Also create in main 'users' collection for Auth linking later?
+                    // The main 'users' collection usually uses UID. Since we don't have UID (no auth user yet),
+                    // we can't create the main user doc effectively without a UID.
+                    // These imported students will be "unclaimed" profiles until they sign up?
+                    // Or is this for just filling the admin view?
+                    // Assuming admin view for now.
+
+                    // NOTE: If they sign up later, the AuthContext signUp will overwrite/link this if logic allows.
+                    // Currently AuthContext writes to this path using UID. 
+                    // Use RegNo as ID here for now so it's consistent. 
+                    // But wait, AuthContext uses `user.uid` as the document ID in the hierarchy.
+                    // If we use RegNo here, we might have duplicates if they sign up (UID != RegNo).
+                    // BUT, we can't generate a UID without creating an Auth user.
+                    // So using RegNo is the best we can do for "pre-filled" data.
 
                     successCount++;
                     setProgress({ current: i + 1, total: entries.length });
-                    setStatus(`✅ Imported ${successCount} of ${entries.length} students to /admin/students/EEE/...`);
+                    setStatus(`✅ Imported ${successCount} of ${entries.length} to /admin/students/${branch}/${year}/${section}...`);
                 } catch (error: any) {
                     console.error(`Error importing student ${regNo}:`, error);
                     errorCount++;
                 }
             }
 
-            setStatus(`✅ Import complete! Successfully imported ${successCount} students to /admin/students/EEE/. ${errorCount > 0 ? `Failed: ${errorCount}` : ''}`);
+            setStatus(`✅ Import complete! Successfully imported ${successCount} students. Failed: ${errorCount}`);
             setImporting(false);
         } catch (error: any) {
             setStatus(`❌ Error: ${error.message}`);

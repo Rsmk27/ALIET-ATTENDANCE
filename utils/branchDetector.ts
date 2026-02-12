@@ -46,7 +46,7 @@ export const detectBranchInfo = (regNo: string): BranchDetectionResult => {
 
     const cleanRegNo = regNo.trim().toUpperCase();
 
-    // 1. Validate Year (Indices 0,1) - Basic numeric check
+    // 1. Validate Year (Indices 0,1)
     if (cleanRegNo.length >= 2) {
         const yearStr = cleanRegNo.substring(0, 2);
         if (isNaN(parseInt(yearStr, 10))) {
@@ -54,77 +54,73 @@ export const detectBranchInfo = (regNo: string): BranchDetectionResult => {
             return result;
         }
 
-        // Calculate Year logic using Dynamic Reference (System Date)
-        // Take THAT Year (Current Year) as Reference
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear() % 100;
         const joinYear = parseInt(yearStr, 10);
 
+        // Academic Year Calc
+        // If joinYear is 24, currentYear is 26. Diff is 2.
+        // If month is June (5) or later, they have started the next academic year?
+        // Usually:
+        // June 2024 joined.
+        // Feb 2025 -> 1st Year. (25-24 = 1. Month < 5. Calc=1)
+        // June 2025 -> 2nd Year starts. (25-24 = 1. Month>=5. Calc=2)
+        // Feb 2026 -> 2nd Year. (26-24 = 2. Month < 5. Calc=2)
+        // This logic seems correct for JNTU/India academic cycles.
+
         let academicYear = currentYear - joinYear;
 
-        // If Academic Year started (June or later), add 1
-        // e.g. Feb 2026 (Month 1): 26 - 24 = 2. (2nd Year)
-        // e.g. June 2026 (Month 5+): 26 - 24 + 1 = 3. (3rd Year)
-        if (currentDate.getMonth() >= 5) {
+        if (currentDate.getMonth() >= 5) { // June or later
             academicYear += 1;
         }
+
+        // Handle case where academicYear might be 0 (just joined before June)
+        // e.g. Joined Jan 2025 (Lateral?) -> 25-25=0.
+        if (academicYear < 1) academicYear = 1;
 
         result.calculatedYear = academicYear;
     }
 
-    // 2. Validate College Code (Indices 2,3) - Must be HP
+    // 2. Validate College Code
     if (cleanRegNo.length >= 4) {
         const code = cleanRegNo.substring(2, 4);
         if (code !== COLLEGE_CODE) {
             result.warning = "Invalid College Code (Must be HP)";
-            return result;
+            // We continue anyway to try and detect branch for flexibility
         }
     }
 
-    // 3. Validate Entry Level (Indices 4,5) - Must be 1A or 5A
+    // 3. Validate Entry Level
     if (cleanRegNo.length >= 6) {
         const entryCode = cleanRegNo.substring(4, 6);
-        if (!VALID_ENTRY_CODES.includes(entryCode)) {
-            result.warning = "Invalid Entry Code (Must be 1A or 5A)";
-            return result;
-        }
-
-        // Set Entry Type logic
         if (entryCode === '1A') {
             result.entryType = 'Regular';
         } else if (entryCode === '5A') {
             result.entryType = 'Lateral Entry';
-            // Adjust Year for Lateral Entry (+1)
             if (result.calculatedYear !== undefined) {
                 result.calculatedYear += 1;
             }
+        } else {
+            result.warning = "Unknown Entry Code";
         }
     }
 
-    // Clamp Year Calculation (1-4) AFTER adjustments
+    // Clamp Year
     if (result.calculatedYear !== undefined) {
         result.calculatedYear = Math.max(1, Math.min(4, result.calculatedYear));
     }
 
-    // 4. Validate Branch Start (Index 6) - Instant check
-    if (cleanRegNo.length >= 7) {
-        const firstDigit = cleanRegNo[6];
-        if (!VALID_FIRST_DIGITS_BRANCH.includes(firstDigit)) {
-            result.warning = "No Branch Found Re-check Ones";
-            return result;
-        }
-    }
-
-    // 5. Validate Full Branch Code (Indices 6,7)
+    // 4. Validate Branch (Code at 6,7)
+    // We removed the strict 'firstDigit' check to allow for more codes if they exist
     if (cleanRegNo.length >= 8) {
         const branchCode = cleanRegNo.substring(6, 8);
         const info = BRANCH_CODES[branchCode];
 
         if (info) {
             result.data = info;
-            result.warning = null; // Clear all warnings if valid up to here
+            result.warning = null; // Valid branch found
         } else {
-            result.warning = "No Branch Found Re-check Ones";
+            result.warning = "Unknown Branch Code";
         }
     }
 

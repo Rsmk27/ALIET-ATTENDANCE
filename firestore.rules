@@ -140,16 +140,22 @@ service cloud.firestore {
       allow write: if isStaffOrAbove();
     }
 
-    // Admin Student Records (for registration and management)
-    match /admin/students/{branch}/{studentId} {
-      // Allow public to get specific student record by ID (needed for registration verification)
-      allow get: if true;
-      
-      // Only admin can list all students (prevents database dumping)
-      allow list: if isAdmin();
-      
-      // Only admin can modify student records
-      allow write: if isAdmin();
+    // Admin Student Records
+    match /admin/students {
+      // Allow traversing the structure
+      allow read: if isAuthenticated();
+
+      // Branch/Year Document (e.g. admin/students/EEE/1)
+      match /{branch}/{year} {
+          allow read, write: if isAuthenticated();
+
+          // Section/Student Document (e.g. admin/students/EEE/1/A/UID)
+          match /{section}/{studentId} {
+              allow read: if isAuthenticated();
+              allow list: if isStaffOrAbove();
+              allow write: if isAdmin() || request.auth.uid == studentId;
+          }
+      }
     }
   }
 }

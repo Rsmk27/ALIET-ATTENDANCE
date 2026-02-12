@@ -141,14 +141,17 @@ export default function StudentRegisterPage() {
                                             // Auto-fill Name from Registry
                                             const foundName = (studentData as Record<string, string>)[newRegNo];
 
-                                            setFormData({
-                                                ...formData,
+                                            setFormData(prev => ({
+                                                ...prev,
                                                 registrationNumber: newRegNo,
-                                                name: foundName || formData.name, // Only overwrite if found
-                                                branch: info?.branch || formData.branch,
-                                                department: info?.branch || formData.department,
-                                                year: calculatedYear || formData.year
-                                            });
+                                                // Update name if found in registry, else keep typed name
+                                                name: foundName || prev.name,
+                                                // Update branch/dept only if detected, else keep manual
+                                                branch: info?.branch || prev.branch,
+                                                department: info?.branch || prev.department,
+                                                // Update year if calculated, else keep manual
+                                                year: calculatedYear || prev.year
+                                            }));
                                         }}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
                                         placeholder="e.g., 24HP5A0216"
@@ -239,9 +242,9 @@ export default function StudentRegisterPage() {
                                             const val = e.target.value.toUpperCase();
                                             const validDepts = ["CSE", "ECE", "EEE", "MECH", "CIVIL", "IT"];
                                             if (validDepts.includes(val)) {
-                                                setFormData({ ...formData, branch: e.target.value, department: val });
+                                                setFormData({ ...formData, branch: val, department: val });
                                             } else {
-                                                setFormData({ ...formData, branch: e.target.value });
+                                                setFormData({ ...formData, branch: val });
                                             }
                                         }}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900"
