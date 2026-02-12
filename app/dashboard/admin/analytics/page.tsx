@@ -103,13 +103,11 @@ export default function AdminAnalyticsPage() {
 
     // 1. Fetch all attendance documents
     const [attendanceDocs, setAttendanceDocs] = useState<any[]>([]);
-    const [allStudents, setAllStudents] = useState<any[]>([]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAttendance = async () => {
             setIsLoading(true);
             try {
-                // Fetch attendance records
                 const attendanceRef = collection(db, 'attendance');
                 const q = query(attendanceRef, orderBy('date', 'desc'));
                 const snapshot = await getDocs(q);
@@ -118,24 +116,14 @@ export default function AdminAnalyticsPage() {
                     ...doc.data()
                 }));
                 setAttendanceDocs(docs);
-
-                // Fetch all students from database
-                const studentsRef = collection(db, 'users');
-                const studentsQuery = query(studentsRef, where('role', '==', 'student'));
-                const studentsSnapshot = await getDocs(studentsQuery);
-                const students = studentsSnapshot.docs.map(doc => ({
-                    uid: doc.id,
-                    ...doc.data()
-                }));
-                setAllStudents(students);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching attendance:', error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchData();
+        fetchAttendance();
     }, []);
 
     // A. Filter attendance docs by date range and selected branches
@@ -156,27 +144,29 @@ export default function AdminAnalyticsPage() {
         });
     }, [attendanceDocs, startDate, endDate, selectedBranches, selectedYear, selectedSection]);
 
-    // 2. Filter students based on selected filters - Use all students from database
+    // 2. Filter students based on selected filters - Extract from attendance records
     const filteredStudents = useMemo(() => {
-        return allStudents.filter(student => {
-            // Filter by selected branches
-            if (selectedBranches.length > 0 && !selectedBranches.includes(student.branch)) return false;
+        const studentMap = new Map();
+        const studentNames = studentData as Record<string, string>;
 
-            // Filter by year
-            if (selectedYear !== 0 && student.year !== selectedYear) return false;
+        filteredDocs.forEach(doc => {
+            const records = doc.records || {};
+            Object.keys(records).forEach(regNo => {
+                if (!studentMap.has(regNo)) {
+                    // Extract student info from attendance record
+                    studentMap.set(regNo, {
+                        regNo,
+                        name: studentNames[regNo] || regNo, // Use name from students.json or fallback to regNo
+                        branch: doc.branch,
+                        year: doc.year,
+                        section: doc.section
+                    });
+                }
+            });
+        });
 
-            // Filter by section
-            if (selectedSection !== 'ALL' && student.section !== selectedSection) return false;
-
-            return true;
-        }).map(student => ({
-            regNo: student.registrationNumber || student.uid,
-            name: student.name,
-            branch: student.branch,
-            year: student.year,
-            section: student.section
-        }));
-    }, [allStudents, selectedBranches, selectedYear, selectedSection]);
+        return Array.from(studentMap.values());
+    }, [filteredDocs]);
 
     // 3. Helper: Calculate Stats for a given set of docs
     const calculateStats = (students: any[], docs: any[]) => {
