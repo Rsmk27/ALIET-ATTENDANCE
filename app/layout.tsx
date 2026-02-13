@@ -6,6 +6,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { ThemeProvider } from "@/context/ThemeContext";
 import NavigationDock from "@/components/ui/NavigationDock";
 import LoadingBar from "@/components/ui/LoadingBar";
+import GlobalPencilLoader from "@/components/ui/GlobalPencilLoader";
 import { Suspense } from "react";
 
 const inter = { className: "font-sans" }; // Fallback to CSS defined font stack
@@ -65,6 +66,7 @@ export default function RootLayout({
                         <Suspense fallback={null}>
                             <LoadingBar />
                         </Suspense>
+                        <GlobalPencilLoader />
                         {children}
 
                         <NavigationDock />

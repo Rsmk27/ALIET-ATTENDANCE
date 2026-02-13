@@ -43,6 +43,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { Component as PencilLoader } from '@/components/ui/loader-1';
 
 // Get total student count from students.json (currently contains EEE 3rd year students)
 const getTotalStudentsFromJson = (): number => {
@@ -472,7 +473,12 @@ export default function AdminAnalyticsPage() {
 
     return (
         <ProtectedRoute allowedRoles={['admin']}>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {isLoading && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm">
+                    <PencilLoader scale={0.8} />
+                </div>
+            )}
+            <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-all duration-300 ${isLoading ? 'blur-[2px] pointer-events-none' : ''}`}>
                 {/* Navigation Header */}
                 <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
                     <div className="max-w-7xl mx-auto px-6 py-4">

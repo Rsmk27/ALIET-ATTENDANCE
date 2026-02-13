@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import studentData from '@/data/students.json';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
+import { Component as PencilLoader } from '@/components/ui/loader-1';
 import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useState, useEffect } from 'react';
@@ -24,7 +25,14 @@ export default function FacultyDashboard() {
         }
     };
 
-    if (loading) return <DashboardSkeleton />;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+            <div className="flex flex-col items-center gap-4">
+                <PencilLoader scale={1.2} />
+                <p className="text-gray-500 animate-pulse font-medium">Loading Dashboard...</p>
+            </div>
+        </div>
+    );
 
     return (
         <ProtectedRoute allowedRoles={['faculty', 'hod']}>

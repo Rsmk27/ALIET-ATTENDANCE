@@ -10,6 +10,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Users, GraduationCap, Building2, LogOut, Search, Filter, Moon, Sun, UserPlus, Edit, X, Save, Trash2, AlertTriangle, Check, XCircle, Mail, LayoutDashboard, BarChart3 } from 'lucide-react';
 import SpotlightCursor from '@/components/ui/SpotlightCursor';
 import { TableSkeleton } from '@/components/ui/Skeleton';
+import { Component as PencilLoader } from '@/components/ui/loader-1';
 import studentData from '@/data/students.json';
 
 interface Student {
@@ -648,7 +649,10 @@ function AdminDashboard() {
                         {/* Table Content */}
                         <div className="p-6">
                             {loading ? (
-                                <TableSkeleton rows={8} cols={activeTab === 'students' ? 7 : 5} />
+                                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                    <PencilLoader scale={0.8} />
+                                    <p className="text-gray-500 dark:text-gray-400 animate-pulse text-sm">Synchronizing data...</p>
+                                </div>
                             ) : (
                                 <div className="overflow-x-auto">
                                     {activeTab === 'students' ? (
