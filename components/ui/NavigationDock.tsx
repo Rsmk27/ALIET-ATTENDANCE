@@ -56,35 +56,36 @@ export default function NavigationDock() {
     if (navItems.length === 0) return null;
 
     return (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-            <div className="flex items-center gap-1 p-2 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-2xl shadow-2xl overflow-hidden group/dock">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+            <div className="flex items-center gap-0.5 p-1 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-xl shadow-2xl overflow-visible group/dock">
                 {navItems.map((item) => {
                     const isActive = pathname === item.path;
+                    const Icon = item.icon;
                     return (
                         <button
                             key={item.path}
                             onClick={() => router.push(item.path)}
                             className={`
-                                relative p-3 rounded-xl transition-all duration-300 group/item flex flex-col items-center
+                                relative p-1.5 rounded-lg transition-all duration-300 group/item flex flex-col items-center justify-center
                                 ${isActive
-                                    ? 'bg-primary-600 text-white shadow-lg'
+                                    ? 'bg-primary-600 text-white shadow-md scale-105'
                                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                 }
-                                hover:-translate-y-2 hover:scale-110 active:scale-95
+                                hover:-translate-y-1 hover:scale-110 active:scale-95
                             `}
                         >
-                            <item.icon className="w-6 h-6" />
+                            <Icon className="w-4 h-4" />
 
                             {/* Label that appears on hover */}
-                            <span className="absolute -top-10 px-3 py-1 bg-gray-900 dark:bg-gray-800 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-gray-700">
+                            <span className="absolute -top-8 px-2 py-0.5 bg-gray-900 dark:bg-gray-800 text-white text-[10px] font-bold rounded shadow-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-gray-700 -translate-x-1/2 left-1/2 ml-0">
                                 {item.label}
                                 {/* Pointer */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
                             </span>
 
                             {/* Active dot */}
                             {isActive && (
-                                <div className="absolute -bottom-1 w-1 h-1 bg-white rounded-full"></div>
+                                <div className="absolute -bottom-0.5 w-0.5 h-0.5 bg-white rounded-full opacity-70"></div>
                             )}
                         </button>
                     );

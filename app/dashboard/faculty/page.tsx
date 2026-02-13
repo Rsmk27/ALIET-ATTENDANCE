@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import {
     User, BarChart3, Presentation, LogOut, Users,
-    X, CheckCircle, Clock, Calendar as CalendarIcon
+    X, CheckCircle, Clock, Calendar as CalendarIcon, ClipboardCheck
 } from 'lucide-react';
 import studentData from '@/data/students.json';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
@@ -106,6 +106,20 @@ export default function FacultyDashboard() {
                                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">View Analytics</h3>
                                             </div>
                                             <p className="text-gray-600 dark:text-gray-400 text-sm">Visualize attendance trends and student performance.</p>
+                                        </div>
+
+                                        {/* Marks Entry */}
+                                        <div
+                                            className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-orange-200 dark:hover:border-orange-700 transition-all cursor-pointer group"
+                                            onClick={() => router.push('/dashboard/faculty/marks')}
+                                        >
+                                            <div className="flex items-center gap-4 mb-3">
+                                                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                                    <ClipboardCheck className="w-6 h-6" />
+                                                </div>
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Enter Marks</h3>
+                                            </div>
+                                            <p className="text-gray-600 dark:text-gray-400 text-sm">Record marks for assignments, mid-exams, and more.</p>
                                         </div>
                                     </div>
                                 </div>

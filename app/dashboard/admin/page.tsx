@@ -607,7 +607,7 @@ function AdminDashboard() {
                                                     <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{year}{year === 1 ? 'st' : year === 2 ? 'nd' : year === 3 ? 'rd' : 'th'} Year</span>
                                                     <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-bold px-2 py-1 rounded-full">{yearStudents.length}</span>
                                                 </div>
-                                                <div className="space-y-2 mt-3 max-h-60 overflow-y-auto custom-scrollbar">
+                                                <div className="space-y-2 mt-3 max-h-60 overflow-y-auto scrollbar-hide">
                                                     {yearStudents.length > 0 ? (
                                                         [...yearStudents].sort((a, b) => (a.registrationNumber || '').localeCompare(b.registrationNumber || '')).map(s => (
                                                             <div key={s.uid} className={`text-xs p-2 rounded flex justify-between items-center group ${s.email === 'Not Registered' ? 'bg-gray-50/50 dark:bg-gray-700/30 opacity-70 italic' : 'bg-gray-50 dark:bg-gray-700/50'} border border-transparent hover:border-primary-300 transition-colors`}>

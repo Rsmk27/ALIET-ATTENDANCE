@@ -90,6 +90,26 @@ service cloud.firestore {
       // Only admin can delete academic records
       allow delete: if isAdmin();
     }
+
+    // Marks records
+    match /marks/{markId} {
+      // Everyone authenticated can read
+      allow read: if isAuthenticated();
+      // Only staff/hod/admin can write
+      allow write: if isStaffOrAbove();
+    }
+
+    // Consolidated Marks records (Legacy)
+    match /marks_consolidated/{markId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaffOrAbove();
+    }
+
+    // Class Consolidated Marks (New)
+    match /marks_class_consolidated/{markId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaffOrAbove();
+    }
     
     // Fee records
     match /finance/{feeId} {

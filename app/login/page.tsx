@@ -319,9 +319,63 @@ export default function LoginPage() {
             // Will redirect based on user role in ProtectedRoute
             router.push('/dashboard');
         } catch (err: any) {
-            // Show user-friendly error message
-            if (err.message?.includes('auth/invalid-credential') || err.message?.includes('auth/user-not-found')) {
-                setError('Invalid email or password. Please try again.');
+            console.error("Login error:", err);
+
+            // Auto-register logic for faculty (if found in local registry)
+            const isAuthError = err.code?.includes('auth/user-not-found') ||
+                err.message?.includes('auth/user-not-found') ||
+                err.message?.includes('auth/invalid-credential');
+
+            if (isAuthError) {
+                // Try to find if user exists in our local registry
+                let existsInRegistry = null;
+                // emailToUse is guaranteed to be set if we reached here
+                const emailParts = emailToUse.split('@');
+                const facultyId = emailParts[0].toUpperCase(); // simple extraction from email
+
+                try {
+                    const facultyModule = await import('@/data/faculty.json');
+                    const facultyData = facultyModule.default as any;
+                    existsInRegistry = facultyData[facultyId];
+                } catch (e) {
+                    // Ignore
+                }
+
+                if (existsInRegistry) {
+                    try {
+                        const info = detectFacultyInfo(facultyId);
+
+                        await signUp(emailToUse, institutionalForm.password, {
+                            role: 'faculty', // Default to faculty
+                            name: existsInRegistry,
+                            employeeId: facultyId,
+                            department: info?.branch || 'General', // Store shorter branch code for department field logic
+                            isApproved: true // Auto-approve since they are in the trusted list
+                        });
+
+                        // Log the auto-creation
+                        await addDoc(collection(db, 'admin/logs/logins'), {
+                            email: emailToUse,
+                            role: 'faculty',
+                            name: existsInRegistry,
+                            action: 'auto-register',
+                            timestamp: new Date()
+                        });
+
+                        router.push('/dashboard');
+                        return;
+
+                    } catch (regErr: any) {
+                        console.error("Auto-registration failed", regErr);
+                        if (regErr.code === 'auth/email-already-in-use') {
+                            setError("Incorrect Password. Please try again.");
+                        } else {
+                            setError(regErr.message || 'Login/Registration failed');
+                        }
+                    }
+                } else {
+                    setError('Invalid Staff ID or Password. If you are new, please Register.');
+                }
             } else {
                 setError(err.message || 'Failed to sign in');
             }
