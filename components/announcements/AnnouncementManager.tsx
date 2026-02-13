@@ -31,6 +31,7 @@ export default function AnnouncementManager() {
     const [tier, setTier] = useState<AnnouncementTier>('institutional');
     const [audience, setAudience] = useState<AnnouncementAudience>('all');
     const [department, setDepartment] = useState('');
+    const [sendPush, setSendPush] = useState(false);
 
     const DEPARTMENTS = ['CIVIL', 'EEE', 'MECH', 'ECE', 'CSE', 'IT', 'CSM', 'CSD'];
 
@@ -51,6 +52,7 @@ export default function AnnouncementManager() {
         setTier('institutional');
         setAudience('all');
         setDepartment('');
+        setSendPush(false);
         setEditingId(null);
         setIsAdding(false);
     };
@@ -62,6 +64,7 @@ export default function AnnouncementManager() {
         setTier(ann.tier);
         setAudience(ann.audience || 'all');
         setDepartment(ann.department || '');
+        setSendPush(false); // Reset for safety or load if property exists
         setIsAdding(true);
         // Scroll to form
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -85,7 +88,7 @@ export default function AnnouncementManager() {
                 });
             } else {
                 // Add new
-                await addDoc(collection(db, 'announcements'), {
+                const docRef = await addDoc(collection(db, 'announcements'), {
                     title,
                     content,
                     tier,
@@ -96,6 +99,27 @@ export default function AnnouncementManager() {
                     createdAt: serverTimestamp(),
                     isActive: true
                 });
+
+                if (sendPush) {
+                    // Trigger Push Notification Logic
+                    // Since we are client-side only without admin SDK, we'll save a request to a collection 
+                    // that a backend function could listen to.
+                    try {
+                        await addDoc(collection(db, 'admin', 'notifications', 'queue'), {
+                            announcementId: docRef.id,
+                            title,
+                            body: content,
+                            audience,
+                            department,
+                            status: 'pending',
+                            createdAt: serverTimestamp()
+                        });
+                        console.log("Push notification queued for backend processing.");
+                        alert("Announcement posted! Notification queued (requires backend setup).");
+                    } catch (err) {
+                        console.error("Failed to queue notification", err);
+                    }
+                }
             }
 
             resetForm();
@@ -221,6 +245,19 @@ export default function AnnouncementManager() {
                                 className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600"
                                 required
                             />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="sendPush"
+                                checked={sendPush}
+                                onChange={(e) => setSendPush(e.target.checked)}
+                                className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                            />
+                            <label htmlFor="sendPush" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Send Push Notification
+                            </label>
                         </div>
 
                         <button

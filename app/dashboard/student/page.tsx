@@ -5,6 +5,7 @@ import AnnouncementTicker from '@/components/announcements/AnnouncementTicker';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import ThemeToggleFloating from '@/components/ui/ThemeToggleFloating';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
@@ -15,6 +16,7 @@ import {
     LogOut,
     Bell,
     Lock,
+    X,
 } from 'lucide-react';
 
 import { db } from '@/lib/firebase/config';
@@ -23,8 +25,10 @@ import { collection, query, where, getDocs, orderBy, limit, onSnapshot } from 'f
 export default function StudentDashboard() {
     const { currentUser, signOut } = useAuth();
     const router = useRouter();
+    const { requestPermission, permission, isSupported } = usePushNotifications();
     const [attendanceStats, setAttendanceStats] = useState({ percent: 0, classes: 0, present: 0 });
 
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [recentAttendance, setRecentAttendance] = useState<any[]>([]);
     const [subjectCount, setSubjectCount] = useState(0);
     const [averageMarks, setAverageMarks] = useState(0);
@@ -187,9 +191,56 @@ export default function StudentDashboard() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                    <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                                </button>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
+                                    >
+                                        <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                        {permission === 'default' && isSupported && (
+                                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-800"></span>
+                                        )}
+                                    </button>
+
+                                    {/* Notification Dropdown */}
+                                    {isNotificationOpen && (
+                                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="p-3 border-b border-gray-100 dark:border-gray-700 font-semibold text-gray-900 dark:text-white flex justify-between items-center">
+                                                <span>Notifications</span>
+                                                <button onClick={() => setIsNotificationOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                                    <X className="w-4 h-4" /> {/* Ensure X is imported if used, otherwise remove or use text 'x' */}
+                                                </button>
+                                            </div>
+                                            <div className="p-2 max-h-[300px] overflow-y-auto">
+                                                {permission === 'default' && isSupported ? (
+                                                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
+                                                        <div className="mx-auto w-10 h-10 bg-indigo-100 dark:bg-indigo-800 rounded-full flex items-center justify-center mb-2">
+                                                            <Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />
+                                                        </div>
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Enable Notifications</p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                            Don't miss out on important updates.
+                                                        </p>
+                                                        <button
+                                                            onClick={() => {
+                                                                requestPermission();
+                                                                setIsNotificationOpen(false);
+                                                            }}
+                                                            className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors"
+                                                        >
+                                                            Turn On
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                        <Bell className="w-8 h-8 mb-2 opacity-20" />
+                                                        <p className="text-xs">No new notifications</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                                 <button
                                     onClick={handleSignOut}
                                     className="flex items-center gap-2 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -216,6 +267,8 @@ export default function StudentDashboard() {
                             {currentUser?.branch} - {currentUser?.section} | Year {currentUser?.year}
                         </p>
                     </div>
+
+
 
                     {/* Quick Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -268,7 +321,8 @@ export default function StudentDashboard() {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Recent Activity */}
+                    <div className="grid grid-cols-1 gap-6">
                         <div className="card">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Attendance</h3>
                             <div className="space-y-3">
@@ -296,36 +350,6 @@ export default function StudentDashboard() {
                                             </div>
                                         ))
                                     )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="card">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Announcements</h3>
-                            <div className="space-y-3">
-                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <div className="flex items-start gap-2">
-                                        <Bell className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-1" />
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">Mid-term Exams Schedule</p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                Mid-term examinations will be conducted from March 1-10, 2026.
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">2 hours ago</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                    <div className="flex items-start gap-2">
-                                        <Bell className="w-4 h-4 text-green-600 dark:text-green-400 mt-1" />
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">Fee Payment Reminder</p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                Semester fees due date is approaching. Please clear pending dues.
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">1 day ago</p>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

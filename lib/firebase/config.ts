@@ -19,10 +19,24 @@ export const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize services
+// Initialize services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const realtimeDb = getDatabase(app);
 export const storage = getStorage(app);
+
+// Initialize Messaging (Client-Side Only)
+let messaging: any = null;
+if (typeof window !== 'undefined') {
+    import('firebase/messaging').then((module) => {
+        try {
+            messaging = module.getMessaging(app);
+        } catch (e) {
+            console.error('Firebase Messaging failed to initialize', e);
+        }
+    });
+}
+export { messaging };
 
 // Initialize Analytics (only on client side)
 let analytics;
