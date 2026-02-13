@@ -9,6 +9,8 @@ import {
     GoogleAuthProvider,
     signOut as firebaseSignOut,
     onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
@@ -44,6 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Force local persistence
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error("Auth persistence error:", error);
+        });
+
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setFirebaseUser(user);
 

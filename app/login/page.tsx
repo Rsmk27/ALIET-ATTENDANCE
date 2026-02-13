@@ -7,7 +7,8 @@ import RoleSelectionModal from '@/components/auth/RoleSelectionModal';
 import { GraduationCap, Building2, Mail, Lock, User, Phone, Quote, X } from 'lucide-react';
 import Image from 'next/image';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, auth } from '@/lib/firebase/config';
+import { setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { detectBranchInfo, detectFacultyInfo } from '@/utils/branchDetector';
 import InstallPrompt from '@/components/ui/InstallPrompt';
 
@@ -212,6 +213,9 @@ export default function LoginPage() {
         setError('');
 
         try {
+            // Ensure persistence is set to LOCAL
+            await setPersistence(auth, browserLocalPersistence);
+
             // For student login, we'll use registration number as email format
             const email = `${studentForm.registrationNumber}@aliet.ac.in`.toLowerCase();
             await signIn(email, studentForm.password);
@@ -253,6 +257,9 @@ export default function LoginPage() {
 
                     // Branch info
                     const { data: info, calculatedYear } = detectBranchInfo(regNo);
+
+                    // Ensure persistence
+                    await setPersistence(auth, browserLocalPersistence);
 
                     await signUp(email, password, {
                         role: 'student',
@@ -302,6 +309,9 @@ export default function LoginPage() {
         const emailToUse = emailOverride || institutionalForm.email;
 
         try {
+            // Ensure persistence is set to LOCAL
+            await setPersistence(auth, browserLocalPersistence);
+
             await signIn(emailToUse, institutionalForm.password);
 
             // Log activity
