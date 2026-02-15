@@ -14,6 +14,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
+import { getAdminEmails } from '@/lib/security/admin';
 // Removed static import of studentData to reduce bundle size
 import { User, UserRole } from '@/types';
 
@@ -38,7 +39,9 @@ export function useAuth() {
     return context;
 }
 
-export const ADMIN_EMAILS = ['zestacademyonline@gmail.com', 'ramunarlapati27@gmail.com'];
+// SECURITY: Admin emails moved to centralized utility
+// Use getAdminEmails() from @/lib/security/admin instead
+export const ADMIN_EMAILS = getAdminEmails();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);

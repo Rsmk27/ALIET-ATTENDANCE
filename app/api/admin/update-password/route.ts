@@ -1,5 +1,9 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
+import { updatePasswordRequestSchema } from '@/lib/validation/schemas';
+import { isAdminEmail } from '@/lib/security/admin';
+import { z } from 'zod';
 
 export async function POST(req: NextRequest) {
     if (!adminAuth) {
@@ -11,37 +15,74 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { uid, email, newPassword, adminToken } = body;
 
-        console.log(`[UpdatePassword] Request for UID: ${uid}, Email: ${email}`);
+        // SECURITY: Validate input before processing
+        let validated;
+        try {
+            validated = updatePasswordRequestSchema.parse(body);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                return NextResponse.json(
+                    {
+                        error: 'Invalid input',
+                        details: error.errors.map(e => ({
+                            field: e.path.join('.'),
+                            message: e.message
+                        }))
+                    },
+                    { status: 400 }
+                );
+            }
+            throw error;
+        }
 
-        if (!uid || !newPassword) {
+        const { uid, email, newPassword, adminToken } = validated;
+
+        // SECURITY: Verify admin authentication (CRITICAL - DO NOT DISABLE)
+        if (!adminToken) {
             return NextResponse.json(
-                { error: 'Missing uid or newPassword' },
-                { status: 400 }
+                { error: 'Unauthorized: No token provided' },
+                { status: 401 }
             );
         }
 
-        // verify admin
-        if (adminToken) {
-            try {
-                await adminAuth.verifyIdToken(adminToken);
-            } catch (e) {
-                console.error("Admin token verification failed:", e);
-                // For debugging: don't block, but log it.
-                // return NextResponse.json({ error: 'Unauthorized: Invalid Token' }, { status: 401 });
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(adminToken);
+            
+            // SECURITY: Verify admin access using centralized utility
+            if (!isAdminEmail(decodedToken.email)) {
+                return NextResponse.json(
+                    { error: 'Forbidden: Admin access required' },
+                    { status: 403 }
+                );
             }
+            
+            // TODO: Implement custom claims for better security
+            // const userRecord = await adminAuth.getUser(decodedToken.uid);
+            // if (!userRecord.customClaims?.admin) {
+            //     return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+            // }
+        } catch (e) {
+            console.error("Admin token verification failed:", e);
+            return NextResponse.json(
+                { error: 'Unauthorized: Invalid Token' },
+                { status: 401 }
+            );
         }
 
         try {
             await adminAuth.updateUser(uid, {
                 password: newPassword,
             });
-            console.log(`[UpdatePassword] Successfully updated password for UID: ${uid}`);
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`[UpdatePassword] Successfully updated password for UID: ${uid}`);
+            }
             return NextResponse.json({ success: true, action: 'updated' });
         } catch (updateError: any) {
             if (updateError.code === 'auth/user-not-found') {
-                console.log(`[UpdatePassword] User not found (UID: ${uid}). Attempting to create new user...`);
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`[UpdatePassword] User not found (UID: ${uid}). Attempting to create new user...`);
+                }
 
                 if (!email) {
                     return NextResponse.json(
@@ -57,7 +98,9 @@ export async function POST(req: NextRequest) {
                         password: newPassword,
                         emailVerified: true // Auto-verify since admin created it
                     });
-                    console.log(`[UpdatePassword] Successfully created new user for UID: ${uid}`);
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log(`[UpdatePassword] Successfully created new user for UID: ${uid}`);
+                    }
                     return NextResponse.json({ success: true, action: 'created' });
                 } catch (createError: any) {
                     console.error('[UpdatePassword] Failed to create user:', createError);

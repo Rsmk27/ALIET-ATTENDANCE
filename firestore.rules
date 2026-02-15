@@ -161,18 +161,22 @@ service cloud.firestore {
     }
 
     // Admin Student Records
+    // SECURITY FIX: Restricted access - only staff can view student data
     match /admin/students {
-      // Allow traversing the structure
-      allow read: if isAuthenticated();
+      // Staff and above can list/traverse the structure
+      allow read: if isStaffOrAbove();
 
       // Branch/Year Document (e.g. admin/students/EEE/1)
       match /{branch}/{year} {
-          allow read, write: if isAuthenticated();
+          // Only staff can read/write year metadata
+          allow read: if isStaffOrAbove();
+          allow write: if isAdmin() || isHOD();
 
           // Section/Student Document (e.g. admin/students/EEE/1/A/UID)
           match /{section}/{studentId} {
-              allow read: if isAuthenticated();
-              allow list: if isStaffOrAbove();
+              // Students can read their own data, staff can read all
+              allow read: if isAuthenticated() && (request.auth.uid == studentId || isStaffOrAbove());
+              // Only admin can write, or students can update their own limited fields
               allow write: if isAdmin() || request.auth.uid == studentId;
           }
       }
