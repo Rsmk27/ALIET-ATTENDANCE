@@ -46,10 +46,24 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-            await adminAuth.verifyIdToken(adminToken);
-            // TODO: Add custom claims verification for admin role
-            // const decodedToken = await adminAuth.verifyIdToken(adminToken);
-            // if (!decodedToken.admin) {
+            const decodedToken = await adminAuth.verifyIdToken(adminToken);
+            
+            // SECURITY: Verify admin access
+            // Check if user email is in admin list
+            const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS
+                ? process.env.NEXT_PUBLIC_ADMIN_EMAILS.split(',').map(e => e.trim())
+                : ['zestacademyonline@gmail.com', 'ramunarlapati27@gmail.com'];
+            
+            if (!decodedToken.email || !adminEmails.includes(decodedToken.email)) {
+                return NextResponse.json(
+                    { error: 'Forbidden: Admin access required' },
+                    { status: 403 }
+                );
+            }
+            
+            // TODO: Implement custom claims for better security
+            // const userRecord = await adminAuth.getUser(decodedToken.uid);
+            // if (!userRecord.customClaims?.admin) {
             //     return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
             // }
         } catch (e) {
